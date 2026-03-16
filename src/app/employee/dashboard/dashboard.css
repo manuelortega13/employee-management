@@ -1,0 +1,21 @@
+@reference "tailwindcss";
+
+.page-title {
+  @apply text-2xl font-bold text-slate-800 mb-6;
+}
+
+.stats-grid {
+  @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6;
+}
+
+.stat-card {
+  @apply bg-white rounded-xl p-6 shadow-sm border border-slate-200 flex flex-col gap-2;
+}
+
+.stat-label {
+  @apply text-sm text-slate-500 font-medium;
+}
+
+.stat-value {
+  @apply text-3xl font-bold text-slate-800;
+}

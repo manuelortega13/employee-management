@@ -1,0 +1,71 @@
+<h1 class="page-title">Attendance Report</h1>
+
+<div class="month-nav">
+  <button class="nav-btn" (click)="previousMonth()">&larr;</button>
+  <span class="month-label">{{ monthLabel() }}</span>
+  <button class="nav-btn" (click)="nextMonth()">&rarr;</button>
+</div>
+
+<div class="stats-grid">
+  <div class="stat-card">
+    <span class="stat-label">Days Present</span>
+    <span class="stat-value">{{ totalDays() }}</span>
+  </div>
+  <div class="stat-card">
+    <span class="stat-label">Completed Days</span>
+    <span class="stat-value">{{ completedDays() }}</span>
+  </div>
+  <div class="stat-card">
+    <span class="stat-label">Total Hours Worked</span>
+    <span class="stat-value">{{ formatDuration(totalWorkedMs()) }}</span>
+  </div>
+  <div class="stat-card">
+    <span class="stat-label">Avg. Hours / Day</span>
+    <span class="stat-value">{{ formatDuration(averageWorkedMs()) }}</span>
+  </div>
+</div>
+
+@if (monthRecords().length > 0) {
+  <table class="report-table">
+    <thead>
+      <tr>
+        <th>Date</th>
+        <th>Check In</th>
+        <th>Check Out</th>
+        <th>Hours Worked</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (record of monthRecords(); track record.date) {
+        <tr>
+          <td>{{ utc(record.checkIn) | date: 'EEE, MMM d' }}</td>
+          <td>{{ utc(record.checkIn) | date: 'hh:mm:ss a' }}</td>
+          <td>
+            @if (record.checkOut) {
+              {{ utc(record.checkOut!) | date: 'hh:mm:ss a' }}
+            } @else {
+              -
+            }
+          </td>
+          <td>
+            @if (record.checkOut) {
+              {{ formatDuration(getWorkedMs(record)) }}
+            } @else {
+              -
+            }
+          </td>
+          <td>
+            <span [class]="record.checkOut ? 'badge-complete' : 'badge-progress'">
+              {{ getStatus(record) }}
+            </span>
+          </td>
+        </tr>
+      }
+    </tbody>
+  </table>
+} @else {
+  <div class="empty-state">
+    <p>No attendance records for {{ monthLabel() }}.</p>
+  </div>
+}

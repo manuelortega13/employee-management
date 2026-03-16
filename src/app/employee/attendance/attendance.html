@@ -1,0 +1,181 @@
+<h1 class="page-title">Attendance</h1>
+
+<div class="clock-section">
+  <p class="current-date">{{ now() | date: 'EEEE, MMMM d, y' }}</p>
+  <p class="current-time">{{ now() | date: 'hh:mm:ss a' }}</p>
+
+  @if (error()) {
+    <div class="attendance-error">{{ error() }}</div>
+  }
+
+  <div class="actions">
+    @if (!todayRecord()) {
+      <button class="btn btn-check-in" (click)="openCamera('checkIn')">Check In</button>
+    } @else if (isCheckedIn()) {
+      <div class="action-group">
+        @if (isOnBreak()) {
+          <button class="btn btn-break-end" (click)="openCamera('endBreak')">End Break</button>
+        } @else {
+          <button class="btn btn-break-start" (click)="openCamera('startBreak')">Start Break</button>
+          <button class="btn btn-check-out" (click)="openCamera('checkOut')">Check Out</button>
+        }
+      </div>
+    } @else {
+      <span class="status-done">You have completed your attendance for today.</span>
+    }
+  </div>
+
+  @if (todayRecord(); as today) {
+    <div class="today-summary">
+      <div class="summary-item">
+        <span class="summary-label">Checked in at</span>
+        <span class="summary-value">{{ utc(today.checkIn) | date: 'hh:mm:ss a' }}</span>
+        <img [src]="today.checkInPhoto" alt="Check-in selfie" class="selfie-thumb clickable" (click)="openPreview(today.checkInPhoto)" />
+      </div>
+      @if (today.breaks.length > 0) {
+        <div class="summary-item">
+          <span class="summary-label">Breaks ({{ today.breaks.length }})</span>
+          <span class="summary-value">{{ formatBreakDuration(today) }}</span>
+          <div class="break-selfies">
+            @for (b of today.breaks; track b.id) {
+              <div class="break-selfie-pair">
+                <img [src]="b.startPhoto" alt="Break start selfie" class="selfie-thumb-sm clickable" (click)="openPreview(b.startPhoto)" />
+                @if (b.endPhoto) {
+                  <img [src]="b.endPhoto" alt="Break end selfie" class="selfie-thumb-sm clickable" (click)="openPreview(b.endPhoto!)" />
+                }
+              </div>
+            }
+          </div>
+        </div>
+      }
+      @if (today.checkOut) {
+        <div class="summary-item">
+          <span class="summary-label">Checked out at</span>
+          <span class="summary-value">{{ utc(today.checkOut!) | date: 'hh:mm:ss a' }}</span>
+          <img [src]="today.checkOutPhoto" alt="Check-out selfie" class="selfie-thumb clickable" (click)="openPreview(today.checkOutPhoto!)" />
+        </div>
+        <div class="summary-item">
+          <span class="summary-label">Total Hours</span>
+          <span class="summary-value">{{ formatDuration(today) }}</span>
+        </div>
+      }
+    </div>
+  }
+</div>
+
+@if (cameraOpen()) {
+  <div class="camera-overlay" (click)="closeCamera()">
+    <div class="camera-modal" (click)="$event.stopPropagation()">
+      <div class="camera-header">
+        <h3>{{ cameraLabels[cameraAction()] }} - Take a Selfie</h3>
+        <button class="btn-close" (click)="closeCamera()">&times;</button>
+      </div>
+
+      @if (cameraError()) {
+        <div class="camera-error">
+          <p>{{ cameraError() }}</p>
+          <button class="btn btn-secondary" (click)="closeCamera()">Close</button>
+        </div>
+      } @else {
+        <div class="camera-body">
+          @if (!capturedPhoto()) {
+            <div class="video-wrapper">
+              <video #videoEl autoplay playsinline></video>
+              @if (!cameraReady()) {
+                <div class="camera-loading">Starting camera...</div>
+              }
+            </div>
+            <button class="btn btn-capture" [disabled]="!cameraReady()" (click)="capture()">
+              Capture
+            </button>
+          } @else {
+            <div class="video-wrapper">
+              <img [src]="capturedPhoto()" alt="Captured selfie" />
+            </div>
+            <div class="confirm-actions">
+              <button class="btn btn-secondary" (click)="retake()">Retake</button>
+              <button class="btn btn-confirm" (click)="confirmPhoto()">
+                Confirm {{ cameraLabels[cameraAction()] }}
+              </button>
+            </div>
+          }
+        </div>
+      }
+
+      <canvas #canvasEl class="hidden-canvas"></canvas>
+    </div>
+  </div>
+}
+
+@if (records().length > 0) {
+  <h2 class="section-title">History</h2>
+  <table class="history-table">
+    <thead>
+      <tr>
+        <th>Date</th>
+        <th>Check In</th>
+        <th>Selfie</th>
+        <th>Check Out</th>
+        <th>Selfie</th>
+        <th>Break Time</th>
+        <th>Total Hours</th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (record of records(); track record.date) {
+        <tr>
+          <td>{{ utc(record.checkIn) | date: 'mediumDate' }}</td>
+          <td>{{ utc(record.checkIn) | date: 'hh:mm:ss a' }}</td>
+          <td>
+            <img [src]="record.checkInPhoto" alt="Check-in selfie" class="table-selfie clickable" (click)="openPreview(record.checkInPhoto)" />
+          </td>
+          <td>
+            @if (record.checkOut) {
+              {{ utc(record.checkOut!) | date: 'hh:mm:ss a' }}
+            } @else {
+              <span class="status-active">In progress</span>
+            }
+          </td>
+          <td>
+            @if (record.checkOutPhoto) {
+              <img [src]="record.checkOutPhoto" alt="Check-out selfie" class="table-selfie clickable" (click)="openPreview(record.checkOutPhoto!)" />
+            } @else {
+              <span class="text-slate-400">-</span>
+            }
+          </td>
+          <td>
+            @if (record.breaks.length > 0) {
+              <div>{{ formatBreakDuration(record) }}</div>
+              <div class="break-selfies-row">
+                @for (b of record.breaks; track b.id) {
+                  <img [src]="b.startPhoto" alt="Break start" class="table-selfie clickable" (click)="openPreview(b.startPhoto)" />
+                  @if (b.endPhoto) {
+                    <img [src]="b.endPhoto" alt="Break end" class="table-selfie clickable" (click)="openPreview(b.endPhoto!)" />
+                  }
+                }
+              </div>
+            } @else {
+              -
+            }
+          </td>
+          <td>
+            @if (record.checkOut) {
+              {{ formatDuration(record) }}
+            } @else {
+              <span class="status-active">In progress</span>
+            }
+          </td>
+        </tr>
+      }
+    </tbody>
+  </table>
+}
+
+@if (previewPhoto()) {
+  <div class="preview-overlay" (click)="closePreview()">
+    <div class="preview-modal" (click)="$event.stopPropagation()">
+      <button class="btn-close preview-close" (click)="closePreview()">&times;</button>
+      <img [src]="previewPhoto()" alt="Selfie preview" class="preview-image" />
+    </div>
+  </div>
+}

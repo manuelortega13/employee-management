@@ -1,0 +1,214 @@
+<div class="page-header">
+  <h1 class="page-title">Manage Employees</h1>
+  <button class="btn btn-primary" (click)="openCreate()">+ Add Employee</button>
+</div>
+
+@if (loading()) {
+  <div class="loading">Loading employees...</div>
+}
+
+<div class="search-bar">
+  <input
+    type="text"
+    placeholder="Search by name, email, or position..."
+    [ngModel]="searchQuery()"
+    (ngModelChange)="searchQuery.set($event)"
+    class="search-input"
+  />
+</div>
+
+<table class="employee-table">
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Email</th>
+      <th>Position</th>
+      <th>Role</th>
+      <th>Hire Date</th>
+      <th>Status</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    @for (employee of filteredEmployees(); track employee.id) {
+      <tr>
+        <td>{{ employee.firstName }} {{ employee.lastName }}</td>
+        <td>{{ employee.email }}</td>
+        <td>{{ employee.position }}</td>
+        <td>
+          <span [class]="employee.role === 'ADMIN' ? 'badge-admin' : 'badge-employee'">
+            {{ employee.role }}
+          </span>
+        </td>
+        <td>{{ employee.hireDate | date: 'mediumDate' }}</td>
+        <td>
+          <span [class]="employee.isActive ? 'badge-active' : 'badge-inactive'">
+            {{ employee.isActive ? 'Active' : 'Inactive' }}
+          </span>
+        </td>
+        <td>
+          @if (deleteConfirmId() === employee.id) {
+            <div class="delete-confirm">
+              <span>Delete?</span>
+              <button class="btn-icon btn-danger" (click)="deleteEmployee(employee.id)">Yes</button>
+              <button class="btn-icon btn-secondary" (click)="cancelDelete()">No</button>
+            </div>
+          } @else {
+            <div class="action-buttons">
+              <button class="btn-icon btn-edit" (click)="openEdit(employee)">Edit</button>
+              <button class="btn-icon btn-danger" (click)="confirmDelete(employee.id)">Delete</button>
+            </div>
+          }
+        </td>
+      </tr>
+    } @empty {
+      <tr>
+        <td colspan="7" class="empty-row">No employees found.</td>
+      </tr>
+    }
+  </tbody>
+</table>
+
+@if (modalOpen()) {
+  <div class="modal-overlay" (click)="closeModal()">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>{{ editingEmployee() ? 'Edit Employee' : 'Add Employee' }}</h2>
+        <button class="btn-close" (click)="closeModal()">&times;</button>
+      </div>
+      <form class="modal-body" (ngSubmit)="save()">
+        @if (error()) {
+          <div class="form-error">{{ error() }}</div>
+        }
+        <div class="form-row">
+          <div class="form-group">
+            <label for="firstName">First Name</label>
+            <input
+              id="firstName"
+              type="text"
+              required
+              [ngModel]="form().firstName"
+              (ngModelChange)="updateFormField('firstName', $event)"
+              name="firstName"
+            />
+          </div>
+          <div class="form-group">
+            <label for="lastName">Last Name</label>
+            <input
+              id="lastName"
+              type="text"
+              required
+              [ngModel]="form().lastName"
+              (ngModelChange)="updateFormField('lastName', $event)"
+              name="lastName"
+            />
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="email">Email</label>
+            <input
+              id="email"
+              type="email"
+              required
+              pattern="[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}"
+              [ngModel]="form().email"
+              (ngModelChange)="updateFormField('email', $event)"
+              name="email"
+              #emailField="ngModel"
+            />
+            @if (emailField.touched && emailField.invalid) {
+              <span class="field-error">
+                @if (emailField.errors?.['required']) {
+                  Email is required.
+                } @else {
+                  Please enter a valid email address.
+                }
+              </span>
+            }
+          </div>
+          <div class="form-group">
+            <label for="password">Password</label>
+            <input
+              id="password"
+              type="password"
+              [required]="!editingEmployee()"
+              [ngModel]="form().password"
+              (ngModelChange)="updateFormField('password', $event)"
+              name="password"
+              [placeholder]="editingEmployee() ? 'Leave blank to keep current' : ''"
+            />
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="phone">Phone</label>
+            <input
+              id="phone"
+              type="text"
+              [ngModel]="form().phone"
+              (ngModelChange)="updateFormField('phone', $event)"
+              name="phone"
+            />
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="position">Position</label>
+            <input
+              id="position"
+              type="text"
+              [ngModel]="form().position"
+              (ngModelChange)="updateFormField('position', $event)"
+              name="position"
+            />
+          </div>
+          <div class="form-group">
+            <label for="role">Role</label>
+            <select
+              id="role"
+              [ngModel]="form().role"
+              (ngModelChange)="updateFormField('role', $event)"
+              name="role"
+            >
+              <option value="EMPLOYEE">Employee</option>
+              <option value="ADMIN">Admin</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="hireDate">Hire Date</label>
+            <input
+              id="hireDate"
+              type="date"
+              [ngModel]="form().hireDate"
+              (ngModelChange)="updateFormField('hireDate', $event)"
+              name="hireDate"
+            />
+          </div>
+          @if (editingEmployee()) {
+            <div class="form-group">
+              <label for="isActive">Status</label>
+              <select
+                id="isActive"
+                [ngModel]="form().isActive"
+                (ngModelChange)="updateFormField('isActive', $event === 'true')"
+                name="isActive"
+              >
+                <option [value]="true">Active</option>
+                <option [value]="false">Inactive</option>
+              </select>
+            </div>
+          }
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-cancel" (click)="closeModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary">
+            {{ editingEmployee() ? 'Update' : 'Create' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+}

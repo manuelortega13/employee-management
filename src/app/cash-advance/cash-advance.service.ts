@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { AuthService } from '../auth/auth.service';
 import { db } from '../data/db';
+import { getActivePayrollPeriods, isDateCovered } from '../data/payroll-coverage';
 import { CashAdvanceRecord, CashAdvanceStatus } from '../data/types';
 import { PreferencesService } from '../preferences/preferences.service';
 
@@ -63,12 +64,9 @@ export class CashAdvanceService {
     const employee = await db.employees.get(employeeId);
     if (!employee) throw new Error('Employee not found');
 
-    const lastReleased = await db.payrolls
-      .where('[employeeId+status]')
-      .equals([employeeId, 'RELEASED'])
-      .toArray();
-    const since = lastReleased.reduce<string>(
-      (max, p) => (p.periodEnd > max ? p.periodEnd : max),
+    const coveredPeriods = await getActivePayrollPeriods(employeeId);
+    const since = coveredPeriods.reduce<string>(
+      (max, p) => (p.end > max ? p.end : max),
       '0000-01-01'
     );
     const today = formatIsoDate(new Date());
@@ -82,6 +80,7 @@ export class CashAdvanceService {
     let hoursWorkedMs = 0;
     for (const r of attendance) {
       if (!r.checkOut) continue;
+      if (isDateCovered(r.date, coveredPeriods)) continue;
       const start = parseUtc(r.checkIn).getTime();
       const end = parseUtc(r.checkOut).getTime();
       hoursWorkedMs += Math.max(0, end - start - (r.totalBreakMs ?? 0));

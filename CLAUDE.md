@@ -27,3 +27,21 @@ Employee management application built with Angular 21, using standalone componen
 - Component selector prefix: `app`
 - Prettier: 100 char print width, single quotes, Angular HTML parser
 - Package manager: npm
+
+## UI Rules
+
+- **Never use `alert()`, `confirm()`, or `prompt()`.** They look out of place, can't be styled, block the JS thread, and behave differently across browsers. Always use the in-app `ConfirmService` (`src/app/shared/confirm.service.ts`) for confirmations:
+
+  ```ts
+  private readonly confirmService = inject(ConfirmService);
+
+  const ok = await this.confirmService.ask({
+    title: 'Release payroll?',
+    message: 'This cannot be edited afterwards.',
+    confirmText: 'Release',
+    variant: 'primary', // or 'danger' for destructive actions
+  });
+  if (!ok) return;
+  ```
+
+  For informational messages, use a status banner on the page (existing `.alert-success` / `.alert-error` pattern) — not a popup.

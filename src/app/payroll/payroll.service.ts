@@ -3,6 +3,11 @@ import { AuthService } from '../auth/auth.service';
 import { CashAdvanceService } from '../cash-advance/cash-advance.service';
 import { db } from '../data/db';
 import {
+  getActivePayrollPeriods,
+  isDateCovered,
+  PayrollPeriod,
+} from '../data/payroll-coverage';
+import {
   AttendanceRecordRow,
   EmployeeRecord,
   PayrollRecord,
@@ -21,6 +26,7 @@ export interface PayrollComputation {
   totalBreakMs: number;
   daysComplete: number;
   daysIncomplete: number;
+  daysExcluded: number;
   grossSalary: number;
   outstandingAdvanceTotal: number;
   outstandingAdvanceCount: number;
@@ -61,9 +67,13 @@ export class PayrollService {
     periodStart: string,
     periodEnd: string
   ): Promise<PayrollComputation> {
-    const { employee, attendance } = await this.loadInputs(employeeId, periodStart, periodEnd);
+    const { employee, attendance, coveredPeriods } = await this.loadInputs(
+      employeeId,
+      periodStart,
+      periodEnd
+    );
     const advances = await this.cashAdvances.findOutstandingApproved(employeeId);
-    const base = this.compute(employee, attendance, periodStart, periodEnd);
+    const base = this.compute(employee, attendance, periodStart, periodEnd, coveredPeriods);
     return {
       ...base,
       outstandingAdvanceTotal: round2(advances.reduce((s, a) => s + a.amount, 0)),
@@ -78,12 +88,18 @@ export class PayrollService {
     const me = this.auth.user();
     if (!me) throw new Error('You must be signed in');
 
-    const { employee, attendance } = await this.loadInputs(
+    const { employee, attendance, coveredPeriods } = await this.loadInputs(
       input.employeeId,
       input.periodStart,
       input.periodEnd
     );
-    const comp = this.compute(employee, attendance, input.periodStart, input.periodEnd);
+    const comp = this.compute(
+      employee,
+      attendance,
+      input.periodStart,
+      input.periodEnd,
+      coveredPeriods
+    );
 
     const outstandingAdvances = await this.cashAdvances.findOutstandingApproved(input.employeeId);
     const advanceTotal = round2(outstandingAdvances.reduce((s, a) => s + a.amount, 0));
@@ -264,7 +280,11 @@ export class PayrollService {
     employeeId: number,
     periodStart: string,
     periodEnd: string
-  ): Promise<{ employee: EmployeeRecord; attendance: AttendanceRecordRow[] }> {
+  ): Promise<{
+    employee: EmployeeRecord;
+    attendance: AttendanceRecordRow[];
+    coveredPeriods: PayrollPeriod[];
+  }> {
     const employee = await db.employees.get(employeeId);
     if (!employee) throw new Error('Employee not found');
     const attendance = await db.attendances
@@ -272,14 +292,16 @@ export class PayrollService {
       .equals(employeeId)
       .filter((r) => r.date >= periodStart && r.date <= periodEnd)
       .toArray();
-    return { employee, attendance };
+    const coveredPeriods = await getActivePayrollPeriods(employeeId);
+    return { employee, attendance, coveredPeriods };
   }
 
   private compute(
     employee: EmployeeRecord,
     attendance: AttendanceRecordRow[],
     periodStart: string,
-    periodEnd: string
+    periodEnd: string,
+    coveredPeriods: PayrollPeriod[]
   ): PayrollComputation {
     const workHoursPerDay = this.preferences.workHoursPerDay();
     const dailyRate = employee.dailyRate ?? 0;
@@ -289,8 +311,13 @@ export class PayrollService {
     let totalBreakMs = 0;
     let daysComplete = 0;
     let daysIncomplete = 0;
+    let daysExcluded = 0;
 
     for (const r of attendance) {
+      if (isDateCovered(r.date, coveredPeriods)) {
+        daysExcluded++;
+        continue;
+      }
       if (!r.checkOut) {
         daysIncomplete++;
         continue;
@@ -317,6 +344,7 @@ export class PayrollService {
       totalBreakMs,
       daysComplete,
       daysIncomplete,
+      daysExcluded,
       grossSalary,
       outstandingAdvanceTotal: 0,
       outstandingAdvanceCount: 0,

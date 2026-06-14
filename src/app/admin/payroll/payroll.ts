@@ -9,6 +9,7 @@ import {
   PayrollService,
 } from '../../payroll/payroll.service';
 import { PreferencesService } from '../../preferences/preferences.service';
+import { ConfirmService } from '../../shared/confirm.service';
 import { Employee } from '../employees/data/employee.model';
 import { EmployeeService } from '../employees/data/employee.service';
 
@@ -24,6 +25,7 @@ export class AdminPayroll {
   private readonly service = inject(PayrollService);
   private readonly employeeService = inject(EmployeeService);
   private readonly preferences = inject(PreferencesService);
+  private readonly confirmService = inject(ConfirmService);
 
   protected readonly payrolls = signal<PayrollRecord[]>([]);
   protected readonly employees = signal<Employee[]>([]);
@@ -288,7 +290,14 @@ export class AdminPayroll {
   protected async release(): Promise<void> {
     const r = this.detailRecord();
     if (!r) return;
-    if (!confirm('Mark this payroll as RELEASED? This cannot be edited afterwards.')) return;
+    const ok = await this.confirmService.ask({
+      title: 'Release payroll?',
+      message:
+        'This marks the payroll as RELEASED. Released payrolls cannot be edited afterwards — only voided.',
+      confirmText: 'Release',
+      variant: 'primary',
+    });
+    if (!ok) return;
     try {
       const updated = await this.service.release(r.id);
       this.detailRecord.set(updated);
@@ -302,7 +311,14 @@ export class AdminPayroll {
   protected async cancel(): Promise<void> {
     const r = this.detailRecord();
     if (!r) return;
-    if (!confirm('Cancel this DRAFT payroll? The record will be kept but marked CANCELLED.')) return;
+    const ok = await this.confirmService.ask({
+      title: 'Cancel payroll?',
+      message: 'The draft will be kept on file but marked CANCELLED.',
+      confirmText: 'Cancel payroll',
+      cancelText: 'Keep draft',
+      variant: 'danger',
+    });
+    if (!ok) return;
     try {
       const updated = await this.service.cancel(r.id);
       this.detailRecord.set(updated);
@@ -316,7 +332,14 @@ export class AdminPayroll {
   protected async voidPayroll(): Promise<void> {
     const r = this.detailRecord();
     if (!r) return;
-    if (!confirm('Void this RELEASED payroll? Use this if payment was reversed.')) return;
+    const ok = await this.confirmService.ask({
+      title: 'Void this released payroll?',
+      message:
+        'Use this if the payment was reversed. Any cash advances deducted by this payroll will become available again.',
+      confirmText: 'Void payroll',
+      variant: 'danger',
+    });
+    if (!ok) return;
     try {
       const updated = await this.service.void(r.id);
       this.detailRecord.set(updated);

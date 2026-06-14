@@ -6,6 +6,7 @@ import { BrandingService } from '../branding/branding.service';
 import { applyManifest } from '../branding/manifest';
 import { StorageService } from '../data/storage.service';
 import { CURRENCIES, PreferencesService } from '../preferences/preferences.service';
+import { ConfirmService } from '../shared/confirm.service';
 
 @Component({
   selector: 'app-settings',
@@ -18,6 +19,7 @@ export class Settings {
   private readonly storage = inject(StorageService);
   private readonly branding = inject(BrandingService);
   private readonly preferences = inject(PreferencesService);
+  private readonly confirmService = inject(ConfirmService);
 
   protected readonly lastBackupAt = this.backup.lastBackupAt;
   protected readonly folderName = this.backup.folderName;
@@ -90,7 +92,14 @@ export class Settings {
     input.value = '';
     if (!file) return;
 
-    const confirmed = confirm('Importing will replace all current data. Continue?');
+    const confirmed = await this.confirmService.ask({
+      title: 'Import backup?',
+      message:
+        'This will replace ALL current data with the contents of the backup file. Continue?',
+      confirmText: 'Replace data',
+      cancelText: 'Keep current',
+      variant: 'danger',
+    });
     if (!confirmed) return;
 
     this.busy.set(true);

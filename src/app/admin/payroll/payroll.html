@@ -202,6 +202,9 @@
               @if (p.daysIncomplete > 0) {
                 <div><dt>Days skipped (no checkout)</dt><dd>{{ p.daysIncomplete }}</dd></div>
               }
+              @if (p.daysExcluded > 0) {
+                <div><dt>Days already on another payroll</dt><dd>{{ p.daysExcluded }}</dd></div>
+              }
               <div><dt>Hours worked</dt><dd>{{ formatHours(p.totalHoursMs) }}</dd></div>
               <div class="strong"><dt>Gross salary</dt><dd>{{ formatMoney(p.grossSalary) }}</dd></div>
               @if (p.outstandingAdvanceCount > 0) {
@@ -213,6 +216,12 @@
             </dl>
             @if (p.dailyRate === 0) {
               <p class="warn-note">This employee has no daily rate set. Payroll will be $0.</p>
+            }
+            @if (p.daysExcluded > 0) {
+              <p class="warn-note">
+                {{ p.daysExcluded }} day(s) in this range are already covered by an existing draft
+                or released payroll and won't be paid again.
+              </p>
             }
             @if (p.outstandingAdvanceCount > 0) {
               <p class="note">

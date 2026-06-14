@@ -14,6 +14,7 @@ import { BrandingService } from './branding/branding.service';
 import { applyManifest } from './branding/manifest';
 import { seedIfEmpty } from './data/seed';
 import { StorageService } from './data/storage.service';
+import { PreferencesService } from './preferences/preferences.service';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -23,12 +24,14 @@ export const appConfig: ApplicationConfig = {
       const storage = inject(StorageService);
       const backup = inject(BackupService);
       const branding = inject(BrandingService);
+      const preferences = inject(PreferencesService);
       return (async () => {
         await seedIfEmpty();
         await storage.init();
         await storage.requestPersistence();
         await backup.init();
         await branding.init();
+        await preferences.init();
         applyManifest(branding.logo());
         await backup.runScheduledBackup();
       })();

@@ -88,7 +88,7 @@
 }
 
 .bottom-nav-item {
-  @apply flex-1 flex flex-col items-center justify-center gap-1 py-2 min-h-[64px] no-underline
+  @apply flex-1 flex flex-col items-center justify-center gap-1 py-2 min-h-[64px] no-underline px-1
     text-slate-500 transition-colors hover:text-slate-800
     focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-slate-500;
 }
@@ -98,9 +98,9 @@
 }
 
 .bottom-nav-icon {
-  @apply w-6 h-6;
+  @apply w-5 h-5 sm:w-6 sm:h-6;
 }
 
 .bottom-nav-label {
-  @apply text-[11px] font-medium leading-none;
+  @apply text-[10px] sm:text-[11px] font-medium leading-none truncate max-w-full;
 }

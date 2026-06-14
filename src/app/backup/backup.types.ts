@@ -1,7 +1,15 @@
-import { AttendanceRecordRow, BreakRecordRow, EmployeeRecord } from '../data/types';
+import {
+  AttendanceRecordRow,
+  BreakRecordRow,
+  CashAdvanceRecord,
+  DepartmentRecord,
+  EmployeeRecord,
+  PayrollRecord,
+  TimeOffRequestRecord,
+} from '../data/types';
 
 export const BACKUP_SCHEMA = 'employee-management';
-export const BACKUP_VERSION = 1;
+export const BACKUP_VERSION = 4;
 export const BACKUP_PREFIX = 'employee-management-backup-';
 
 export interface BackupFile {
@@ -12,6 +20,10 @@ export interface BackupFile {
     employees: EmployeeRecord[];
     attendances: AttendanceRecordRow[];
     breaks: BreakRecordRow[];
+    departments?: DepartmentRecord[];
+    requests?: TimeOffRequestRecord[];
+    payrolls?: PayrollRecord[];
+    cashAdvances?: CashAdvanceRecord[];
   };
 }
 

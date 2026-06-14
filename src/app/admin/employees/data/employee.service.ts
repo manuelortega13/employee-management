@@ -56,6 +56,7 @@ export class EmployeeService {
       phone: request.phone ?? '',
       position: request.position ?? '',
       departmentId: request.departmentId ?? null,
+      dailyRate: request.dailyRate ?? 0,
       role: request.role,
       hireDate: request.hireDate,
       isActive: true,
@@ -86,6 +87,7 @@ export class EmployeeService {
     if (request.phone !== undefined) patch.phone = request.phone;
     if (request.position !== undefined) patch.position = request.position;
     if (request.departmentId !== undefined) patch.departmentId = request.departmentId;
+    if (request.dailyRate !== undefined) patch.dailyRate = request.dailyRate;
     if (request.role !== undefined) patch.role = request.role;
     if (request.hireDate !== undefined) patch.hireDate = request.hireDate;
     if (request.isActive !== undefined) patch.isActive = request.isActive;
@@ -110,6 +112,7 @@ function toEmployee(row: EmployeeRecord): Employee {
     phone: row.phone,
     position: row.position,
     departmentId: row.departmentId,
+    dailyRate: row.dailyRate ?? 0,
     role: row.role,
     hireDate: row.hireDate,
     isActive: row.isActive,

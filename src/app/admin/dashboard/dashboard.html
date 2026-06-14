@@ -1,20 +1,43 @@
 <h1 class="page-title">Admin Dashboard</h1>
 
-<div class="stats-grid">
-  <div class="stat-card">
-    <span class="stat-label">Total Employees</span>
-    <span class="stat-value">124</span>
+@if (loading()) {
+  <div class="loading">Loading…</div>
+} @else {
+  <h2 class="section-title">Today</h2>
+  <div class="stats-grid">
+    <div class="stat-card">
+      <span class="stat-label">Checked In Now</span>
+      <span class="stat-value">{{ checkedInNow() }}</span>
+      <span class="stat-foot">of {{ activeEmployees() }} active</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-label">On Break</span>
+      <span class="stat-value">{{ onBreakNow() }}</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-label">Attendance Today</span>
+      <span class="stat-value">{{ attendanceTodayCount() }}</span>
+      <span class="stat-foot">{{ attendanceRate() }} of active</span>
+    </div>
   </div>
-  <div class="stat-card">
-    <span class="stat-label">Departments</span>
-    <span class="stat-value">8</span>
+
+  <h2 class="section-title">Workforce</h2>
+  <div class="stats-grid">
+    <div class="stat-card">
+      <span class="stat-label">Total Employees</span>
+      <span class="stat-value">{{ totalEmployees() }}</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-label">Active</span>
+      <span class="stat-value">{{ activeEmployees() }}</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-label">Admins</span>
+      <span class="stat-value">{{ adminCount() }}</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-label">New Hires (30 days)</span>
+      <span class="stat-value">{{ newHires() }}</span>
+    </div>
   </div>
-  <div class="stat-card">
-    <span class="stat-label">Active Projects</span>
-    <span class="stat-value">15</span>
-  </div>
-  <div class="stat-card">
-    <span class="stat-label">Pending Requests</span>
-    <span class="stat-value">7</span>
-  </div>
-</div>
+}

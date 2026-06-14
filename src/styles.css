@@ -6,3 +6,48 @@ html, body {
   height: 100%;
   margin: 0;
 }
+
+@media print {
+  html,
+  body {
+    height: auto !important;
+    background: white !important;
+  }
+
+  /* Hide all app chrome — only the page content (and the open modal, if any) should print */
+  .topbar,
+  .sidebar,
+  .bottom-nav,
+  .drawer-backdrop {
+    display: none !important;
+  }
+
+  /* Let main content flow naturally on paper */
+  .main-content {
+    padding: 0 !important;
+    overflow: visible !important;
+    background: white !important;
+  }
+
+  /* If a modal is open during print, expand it inline */
+  .modal-overlay {
+    position: static !important;
+    background: none !important;
+    padding: 0 !important;
+    display: block !important;
+    z-index: auto !important;
+  }
+
+  .modal {
+    box-shadow: none !important;
+    max-width: none !important;
+    max-height: none !important;
+    overflow: visible !important;
+    border-radius: 0 !important;
+  }
+
+  /* Anything explicitly marked .no-print is always hidden */
+  .no-print {
+    display: none !important;
+  }
+}

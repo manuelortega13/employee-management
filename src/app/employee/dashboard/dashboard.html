@@ -1,16 +1,54 @@
-<h1 class="page-title">Welcome Back</h1>
+<h1 class="page-title">
+  Welcome back, {{ user()?.firstName }}
+</h1>
+
+<section class="today-card">
+  <div class="today-header">
+    <span class="today-label">Today</span>
+    <span class="badge" [class]="statusBadgeClass()">{{ statusLabel() }}</span>
+  </div>
+
+  <div class="today-grid">
+    <div class="today-cell">
+      <span class="cell-label">Check in</span>
+      <span class="cell-value">
+        @if (checkInTime(); as t) {
+          {{ t | date: 'hh:mm a' }}
+        } @else {
+          —
+        }
+      </span>
+    </div>
+    <div class="today-cell">
+      <span class="cell-label">Check out</span>
+      <span class="cell-value">
+        @if (checkOutTime(); as t) {
+          {{ t | date: 'hh:mm a' }}
+        } @else {
+          —
+        }
+      </span>
+    </div>
+    <div class="today-cell">
+      <span class="cell-label">Hours today</span>
+      <span class="cell-value">{{ hoursToday() }}</span>
+    </div>
+  </div>
+</section>
+
+<h2 class="section-title">{{ monthLabel() }}</h2>
 
 <div class="stats-grid">
   <div class="stat-card">
-    <span class="stat-label">Leave Balance</span>
-    <span class="stat-value">12 days</span>
+    <span class="stat-label">Days Present</span>
+    <span class="stat-value">{{ daysPresent() }}</span>
   </div>
   <div class="stat-card">
-    <span class="stat-label">Pending Requests</span>
-    <span class="stat-value">2</span>
+    <span class="stat-label">Total Hours</span>
+    <span class="stat-value">{{ totalMonthLabel() }}</span>
   </div>
   <div class="stat-card">
-    <span class="stat-label">Upcoming Reviews</span>
-    <span class="stat-value">1</span>
+    <span class="stat-label">Avg per Day</span>
+    <span class="stat-value">{{ avgHoursLabel() }}</span>
   </div>
 </div>

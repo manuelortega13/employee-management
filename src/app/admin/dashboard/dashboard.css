@@ -4,12 +4,20 @@
   @apply text-xl sm:text-2xl font-bold text-slate-800 mb-4 sm:mb-6;
 }
 
+.section-title {
+  @apply text-base sm:text-lg font-semibold text-slate-800 mb-3 sm:mb-4 mt-6 first:mt-0;
+}
+
+.loading {
+  @apply text-slate-500 text-sm;
+}
+
 .stats-grid {
-  @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6;
+  @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-2;
 }
 
 .stat-card {
-  @apply bg-white rounded-xl p-5 sm:p-6 shadow-sm border border-slate-200 flex flex-col gap-2;
+  @apply bg-white rounded-xl p-5 sm:p-6 shadow-sm border border-slate-200 flex flex-col gap-1;
 }
 
 .stat-label {
@@ -18,4 +26,8 @@
 
 .stat-value {
   @apply text-2xl sm:text-3xl font-bold text-slate-800;
+}
+
+.stat-foot {
+  @apply text-xs text-slate-400 mt-1;
 }

@@ -1,6 +1,9 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Department } from '../departments/department.model';
+import { DepartmentService } from '../departments/department.service';
+import { PreferencesService } from '../../preferences/preferences.service';
 import { Employee, EmployeeCreateRequest, EmployeeUpdateRequest } from './data/employee.model';
 import { EmployeeService } from './data/employee.service';
 
@@ -12,8 +15,11 @@ import { EmployeeService } from './data/employee.service';
 })
 export class AdminEmployees {
   private readonly service = inject(EmployeeService);
+  private readonly departmentService = inject(DepartmentService);
+  private readonly preferences = inject(PreferencesService);
 
   protected readonly employees = signal<Employee[]>([]);
+  protected readonly departments = signal<Department[]>([]);
   protected readonly modalOpen = signal(false);
   protected readonly editingEmployee = signal<Employee | null>(null);
   protected readonly searchQuery = signal('');
@@ -29,6 +35,7 @@ export class AdminEmployees {
     phone: '',
     position: '',
     departmentId: null as number | null,
+    dailyRate: 0,
     role: 'EMPLOYEE' as 'ADMIN' | 'EMPLOYEE',
     hireDate: '',
     isActive: true,
@@ -61,6 +68,7 @@ export class AdminEmployees {
       phone: '',
       position: '',
       departmentId: null,
+      dailyRate: 0,
       role: 'EMPLOYEE',
       hireDate: '',
       isActive: true,
@@ -79,6 +87,7 @@ export class AdminEmployees {
       phone: employee.phone,
       position: employee.position,
       departmentId: employee.departmentId,
+      dailyRate: employee.dailyRate,
       role: employee.role,
       hireDate: employee.hireDate,
       isActive: employee.isActive,
@@ -104,6 +113,7 @@ export class AdminEmployees {
         phone: data.phone,
         position: data.position,
         departmentId: data.departmentId,
+        dailyRate: data.dailyRate,
         role: data.role,
         hireDate: data.hireDate,
         isActive: data.isActive,
@@ -125,6 +135,7 @@ export class AdminEmployees {
         phone: data.phone,
         position: data.position,
         departmentId: data.departmentId,
+        dailyRate: data.dailyRate,
         role: data.role,
         hireDate: data.hireDate,
       };
@@ -162,16 +173,30 @@ export class AdminEmployees {
     this.form.update((f) => ({ ...f, [field]: value }));
   }
 
+  protected departmentName(id: number | null): string {
+    if (id === null) return '—';
+    return this.departments().find((d) => d.id === id)?.name ?? '—';
+  }
+
+  protected formatRate(amount: number): string {
+    if (!amount) return '—';
+    return this.preferences.formatAmount(amount);
+  }
+
   private loadEmployees(): void {
     this.loading.set(true);
-    this.service.findAll().subscribe({
-      next: (employees) => {
-        this.employees.set(employees);
-        this.loading.set(false);
-      },
-      error: () => {
-        this.loading.set(false);
-      },
+    Promise.all([
+      new Promise<Employee[]>((resolve) =>
+        this.service.findAll().subscribe({
+          next: (rows) => resolve(rows),
+          error: () => resolve([]),
+        })
+      ),
+      this.departmentService.findAll().catch(() => []),
+    ]).then(([employees, departments]) => {
+      this.employees.set(employees);
+      this.departments.set(departments);
+      this.loading.set(false);
     });
   }
 }

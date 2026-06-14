@@ -106,6 +106,41 @@ export class AttendanceService {
     return this.hydrateRecords(rows);
   }
 
+  async getTodayRecordsForAll(): Promise<AttendanceRecord[]> {
+    const today = this.formatDate(new Date());
+    const rows = await db.attendances.where('date').equals(today).toArray();
+    return this.hydrateRecords(rows);
+  }
+
+  async adminEditTimes(
+    recordId: number,
+    opts: { checkIn?: string; checkOut?: string | null }
+  ): Promise<AttendanceRecordRow> {
+    const row = await db.attendances.get(recordId);
+    if (!row) throw new Error('Attendance record not found');
+
+    const next: Partial<AttendanceRecordRow> = {};
+    if (opts.checkIn !== undefined) next.checkIn = stripZ(opts.checkIn);
+
+    if (opts.checkOut !== undefined) {
+      next.checkOut = opts.checkOut === null ? null : stripZ(opts.checkOut);
+    }
+
+    const proposedCheckIn = next.checkIn ?? row.checkIn;
+    const proposedCheckOut = next.checkOut === undefined ? row.checkOut : next.checkOut;
+    if (proposedCheckOut !== null && proposedCheckOut !== undefined) {
+      const inT = new Date(this.toLocalTime(proposedCheckIn)).getTime();
+      const outT = new Date(this.toLocalTime(proposedCheckOut)).getTime();
+      if (outT < inT) {
+        throw new Error('Check-out must be after check-in');
+      }
+    }
+
+    next.updatedAt = new Date().toISOString();
+    await db.attendances.update(recordId, next);
+    return (await db.attendances.get(recordId))!;
+  }
+
   getRecordsForMonth(year: number, month: number): AttendanceRecord[] {
     const prefix = `${year}-${String(month + 1).padStart(2, '0')}`;
     return this.records().filter((r) => r.date.startsWith(prefix));
@@ -296,4 +331,8 @@ export class AttendanceService {
 
 function nowUtcString(): string {
   return new Date().toISOString().replace(/Z$/, '');
+}
+
+function stripZ(iso: string): string {
+  return iso.replace(/Z$/, '');
 }

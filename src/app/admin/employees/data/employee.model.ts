@@ -6,6 +6,7 @@ export interface Employee {
   phone: string;
   position: string;
   departmentId: number | null;
+  dailyRate: number;
   role: 'ADMIN' | 'EMPLOYEE';
   hireDate: string;
   isActive: boolean;
@@ -21,6 +22,7 @@ export interface EmployeeCreateRequest {
   phone: string;
   position: string;
   departmentId: number | null;
+  dailyRate: number;
   role: 'ADMIN' | 'EMPLOYEE';
   hireDate: string;
 }
@@ -33,6 +35,7 @@ export interface EmployeeUpdateRequest {
   phone?: string;
   position?: string;
   departmentId?: number | null;
+  dailyRate?: number;
   role?: 'ADMIN' | 'EMPLOYEE';
   hireDate?: string;
   isActive?: boolean;

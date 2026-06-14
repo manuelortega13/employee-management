@@ -120,3 +120,18 @@
 .folder-icon {
   @apply w-4 h-4 text-amber-500;
 }
+
+/* Currency */
+
+.form-group {
+  @apply flex flex-col gap-1.5 mb-2;
+}
+
+.form-group label {
+  @apply text-xs font-medium text-slate-500 uppercase tracking-wide;
+}
+
+.currency-select {
+  @apply px-3 py-2.5 rounded-lg border border-slate-200 text-sm text-slate-700 bg-white
+    outline-none focus:border-slate-400 focus:ring-1 focus:ring-slate-400 w-full sm:max-w-xs;
+}

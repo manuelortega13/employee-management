@@ -1,0 +1,128 @@
+<h1 class="page-title">My Profile</h1>
+
+@if (status()) {
+  <div class="alert alert-success" role="status">{{ status() }}</div>
+}
+@if (error()) {
+  <div class="alert alert-error" role="alert">{{ error() }}</div>
+}
+
+@if (employee(); as me) {
+  @if (!editMode()) {
+    <section class="card">
+      <div class="card-header">
+        <div>
+          <h2 class="employee-name">{{ me.firstName }} {{ me.lastName }}</h2>
+          <p class="employee-role">{{ me.role === 'ADMIN' ? 'Administrator' : 'Employee' }}</p>
+        </div>
+        <button class="btn btn-primary" (click)="enterEdit()">Edit Profile</button>
+      </div>
+
+      <dl class="info-grid">
+        <div class="info-row">
+          <dt>Email</dt>
+          <dd>{{ me.email }}</dd>
+        </div>
+        <div class="info-row">
+          <dt>Phone</dt>
+          <dd>{{ me.phone || '—' }}</dd>
+        </div>
+        <div class="info-row">
+          <dt>Position</dt>
+          <dd>{{ me.position || '—' }}</dd>
+        </div>
+        <div class="info-row">
+          <dt>Department</dt>
+          <dd>{{ departmentName() }}</dd>
+        </div>
+        <div class="info-row">
+          <dt>Hire Date</dt>
+          <dd>{{ me.hireDate | date: 'mediumDate' }}</dd>
+        </div>
+        <div class="info-row">
+          <dt>Status</dt>
+          <dd>
+            <span [class]="me.isActive ? 'badge-good' : 'badge-neutral'">
+              {{ me.isActive ? 'Active' : 'Inactive' }}
+            </span>
+          </dd>
+        </div>
+      </dl>
+    </section>
+  } @else {
+    <section class="card">
+      <h2 class="card-title">Edit Profile</h2>
+      <form (ngSubmit)="save()">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="firstName">First Name</label>
+            <input
+              id="firstName"
+              type="text"
+              required
+              [ngModel]="form().firstName"
+              (ngModelChange)="updateField('firstName', $event)"
+              name="firstName"
+            />
+          </div>
+          <div class="form-group">
+            <label for="lastName">Last Name</label>
+            <input
+              id="lastName"
+              type="text"
+              required
+              [ngModel]="form().lastName"
+              (ngModelChange)="updateField('lastName', $event)"
+              name="lastName"
+            />
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="phone">Phone</label>
+            <input
+              id="phone"
+              type="text"
+              [ngModel]="form().phone"
+              (ngModelChange)="updateField('phone', $event)"
+              name="phone"
+            />
+          </div>
+        </div>
+        <p class="form-note">Leave password fields blank to keep your current password.</p>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="password">New Password</label>
+            <input
+              id="password"
+              type="password"
+              autocomplete="new-password"
+              [ngModel]="form().password"
+              (ngModelChange)="updateField('password', $event)"
+              name="password"
+            />
+          </div>
+          <div class="form-group">
+            <label for="confirmPassword">Confirm Password</label>
+            <input
+              id="confirmPassword"
+              type="password"
+              autocomplete="new-password"
+              [ngModel]="form().confirmPassword"
+              (ngModelChange)="updateField('confirmPassword', $event)"
+              name="confirmPassword"
+            />
+          </div>
+        </div>
+        <div class="form-actions">
+          <button type="button" class="btn btn-secondary" (click)="cancelEdit()" [disabled]="busy()">
+            Cancel
+          </button>
+          <button type="submit" class="btn btn-primary" [disabled]="busy()">
+            {{ busy() ? 'Saving…' : 'Save Changes' }}
+          </button>
+        </div>
+      </form>
+    </section>
+  }
+}

@@ -1,0 +1,105 @@
+@reference "tailwindcss";
+
+.page-title {
+  @apply text-xl sm:text-2xl font-bold text-slate-800 mb-4 sm:mb-6;
+}
+
+.alert {
+  @apply mb-4 px-4 py-2.5 rounded-lg text-sm border;
+}
+
+.alert-success {
+  @apply bg-emerald-50 text-emerald-700 border-emerald-200;
+}
+
+.alert-error {
+  @apply bg-rose-50 text-rose-700 border-rose-200;
+}
+
+.card {
+  @apply bg-white rounded-xl p-5 sm:p-6 shadow-sm border border-slate-200;
+}
+
+.card-header {
+  @apply flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4 pb-4 border-b border-slate-100;
+}
+
+.card-title {
+  @apply text-base sm:text-lg font-semibold text-slate-800 mb-4;
+}
+
+.employee-name {
+  @apply text-xl font-bold text-slate-800 m-0;
+}
+
+.employee-role {
+  @apply text-sm text-slate-500 m-0;
+}
+
+.info-grid {
+  @apply flex flex-col gap-2 m-0;
+}
+
+.info-row {
+  @apply flex items-baseline justify-between gap-3 border-b border-slate-100 pb-2 last:border-b-0 last:pb-0;
+}
+
+.info-row dt {
+  @apply text-xs font-medium text-slate-500 uppercase tracking-wide;
+}
+
+.info-row dd {
+  @apply m-0 text-sm text-slate-700 text-right break-words;
+}
+
+.badge-good {
+  @apply inline-block px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700;
+}
+
+.badge-neutral {
+  @apply inline-block px-2 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-500;
+}
+
+/* Form */
+
+.form-row {
+  @apply flex flex-col sm:flex-row gap-4 mb-4;
+}
+
+.form-group {
+  @apply flex-1 flex flex-col gap-1.5;
+}
+
+.form-group label {
+  @apply text-xs font-medium text-slate-500 uppercase tracking-wide;
+}
+
+.form-group input {
+  @apply px-3 py-2.5 rounded-lg border border-slate-200 text-sm text-slate-700
+    outline-none focus:border-slate-400 focus:ring-1 focus:ring-slate-400;
+}
+
+.form-note {
+  @apply text-xs text-slate-500 mb-3 -mt-1;
+}
+
+.form-actions {
+  @apply flex flex-col-reverse sm:flex-row sm:justify-end gap-3 mt-2;
+}
+
+.btn {
+  @apply px-4 py-2.5 rounded-lg font-medium text-sm cursor-pointer border-0 transition-colors
+    focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-slate-400;
+}
+
+.btn:disabled {
+  @apply opacity-50 cursor-not-allowed;
+}
+
+.btn-primary {
+  @apply bg-slate-800 text-white hover:bg-slate-900;
+}
+
+.btn-secondary {
+  @apply bg-slate-100 text-slate-700 hover:bg-slate-200;
+}

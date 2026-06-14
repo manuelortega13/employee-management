@@ -26,6 +26,7 @@ export async function seedIfEmpty(): Promise<void> {
     phone: '555-0001',
     position: 'System Administrator',
     departmentId: null,
+    dailyRate: 0,
     role: 'ADMIN',
     hireDate: '2024-01-01',
     isActive: true,

@@ -1,0 +1,175 @@
+@reference "tailwindcss";
+
+.page-header {
+  @apply flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-5 sm:mb-6;
+}
+
+.page-title {
+  @apply text-xl sm:text-2xl font-bold text-slate-800;
+}
+
+.loading {
+  @apply text-slate-500 text-sm mb-4;
+}
+
+.form-error {
+  @apply mb-4 px-4 py-2.5 rounded-lg bg-rose-50 text-rose-700 text-sm border border-rose-200;
+}
+
+.sr-only {
+  @apply absolute w-px h-px p-0 -m-px overflow-hidden whitespace-nowrap border-0;
+  clip: rect(0, 0, 0, 0);
+}
+
+.search-bar {
+  @apply mb-5 sm:mb-6;
+}
+
+.search-input {
+  @apply w-full px-4 py-2.5 rounded-lg border border-slate-200 bg-white text-sm
+    text-slate-700 placeholder-slate-400 outline-none focus:border-slate-400 focus:ring-1 focus:ring-slate-400;
+}
+
+/* Table */
+
+.table-wrapper {
+  @apply hidden md:block overflow-x-auto bg-white rounded-xl shadow-sm border border-slate-200;
+}
+
+.dept-table {
+  @apply w-full;
+}
+
+.dept-table th {
+  @apply px-5 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider bg-slate-50;
+}
+
+.dept-table td {
+  @apply px-5 py-3.5 text-sm text-slate-700 border-t border-slate-100 align-top;
+}
+
+.dept-name {
+  @apply font-medium text-slate-800;
+}
+
+.dept-desc {
+  @apply text-slate-500;
+}
+
+.empty-row {
+  @apply text-center text-slate-400 py-8;
+}
+
+/* Cards */
+
+.dept-cards {
+  @apply md:hidden flex flex-col gap-3 list-none p-0 m-0;
+}
+
+.dept-card {
+  @apply bg-white rounded-xl shadow-sm border border-slate-200 p-4 flex flex-col gap-2;
+}
+
+.dept-card-header {
+  @apply flex items-center justify-between gap-3;
+}
+
+.dept-card-name {
+  @apply text-sm font-semibold text-slate-800;
+}
+
+.dept-card-desc {
+  @apply text-sm text-slate-600 m-0;
+}
+
+.empty-row-card {
+  @apply bg-white rounded-xl p-6 shadow-sm border border-slate-200 text-center text-slate-400 list-none;
+}
+
+.badge-employee {
+  @apply inline-block px-2 py-0.5 rounded-full text-xs font-medium bg-sky-50 text-sky-700;
+}
+
+/* Buttons */
+
+.btn {
+  @apply px-4 py-2.5 rounded-lg font-medium text-sm cursor-pointer border-0 transition-colors
+    focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-slate-400;
+}
+
+.btn-primary {
+  @apply bg-slate-800 text-white hover:bg-slate-900;
+}
+
+.btn-cancel {
+  @apply bg-slate-100 text-slate-600 hover:bg-slate-200;
+}
+
+.action-buttons {
+  @apply flex gap-2;
+}
+
+.btn-icon {
+  @apply px-3 py-1.5 rounded-md text-xs font-medium cursor-pointer border-0 transition-colors;
+}
+
+.btn-edit {
+  @apply bg-sky-50 text-sky-700 hover:bg-sky-100;
+}
+
+.btn-danger {
+  @apply bg-rose-50 text-rose-700 hover:bg-rose-100;
+}
+
+.btn-secondary {
+  @apply bg-slate-100 text-slate-600 hover:bg-slate-200;
+}
+
+.delete-confirm {
+  @apply flex items-center gap-2 text-xs text-slate-500 flex-wrap;
+}
+
+/* Modal */
+
+.modal-overlay {
+  @apply fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4;
+}
+
+.modal {
+  @apply bg-white rounded-2xl shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto;
+}
+
+.modal-header {
+  @apply flex items-center justify-between px-4 sm:px-6 py-4 border-b border-slate-200;
+}
+
+.modal-header h2 {
+  @apply text-base sm:text-lg font-semibold text-slate-800 m-0;
+}
+
+.btn-close {
+  @apply text-slate-400 hover:text-slate-600 text-2xl leading-none bg-transparent border-0 cursor-pointer p-0
+    inline-flex items-center justify-center w-9 h-9;
+}
+
+.modal-body {
+  @apply p-4 sm:p-6;
+}
+
+.form-group {
+  @apply flex flex-col gap-1.5 mb-4;
+}
+
+.form-group label {
+  @apply text-xs font-medium text-slate-500 uppercase tracking-wide;
+}
+
+.form-group input,
+.form-group textarea {
+  @apply px-3 py-2.5 rounded-lg border border-slate-200 text-sm text-slate-700 bg-white
+    outline-none focus:border-slate-400 focus:ring-1 focus:ring-slate-400 resize-y;
+}
+
+.modal-footer {
+  @apply flex flex-col-reverse sm:flex-row sm:justify-end gap-3 mt-6;
+}

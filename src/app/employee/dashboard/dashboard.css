@@ -4,8 +4,66 @@
   @apply text-xl sm:text-2xl font-bold text-slate-800 mb-4 sm:mb-6;
 }
 
+.section-title {
+  @apply text-base sm:text-lg font-semibold text-slate-800 mb-3 sm:mb-4 mt-6;
+}
+
+/* Today card */
+
+.today-card {
+  @apply bg-white rounded-xl p-5 sm:p-6 shadow-sm border border-slate-200;
+}
+
+.today-header {
+  @apply flex items-center justify-between mb-4;
+}
+
+.today-label {
+  @apply text-xs uppercase tracking-wide text-slate-500 font-medium;
+}
+
+.today-grid {
+  @apply grid grid-cols-3 gap-3 sm:gap-6;
+}
+
+.today-cell {
+  @apply flex flex-col gap-1;
+}
+
+.cell-label {
+  @apply text-xs text-slate-500 font-medium uppercase tracking-wide;
+}
+
+.cell-value {
+  @apply text-base sm:text-xl font-bold text-slate-800 font-mono;
+}
+
+/* Badges */
+
+.badge {
+  @apply inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold;
+}
+
+.badge-good {
+  @apply bg-emerald-50 text-emerald-700;
+}
+
+.badge-warn {
+  @apply bg-amber-50 text-amber-700;
+}
+
+.badge-done {
+  @apply bg-sky-50 text-sky-700;
+}
+
+.badge-neutral {
+  @apply bg-slate-100 text-slate-500;
+}
+
+/* Month stats */
+
 .stats-grid {
-  @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6;
+  @apply grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6;
 }
 
 .stat-card {

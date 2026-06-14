@@ -143,6 +143,7 @@
             <th>Check Out</th>
             <th>Break</th>
             <th>Hours Worked</th>
+            <th>Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -164,6 +165,9 @@
                 } @else {
                   <span class="status-active">In progress</span>
                 }
+              </td>
+              <td>
+                <button class="btn-icon btn-edit" (click)="openEdit(record)">Edit</button>
               </td>
             </tr>
           }
@@ -205,6 +209,9 @@
               </dd>
             </div>
           </dl>
+          <div class="report-card-actions">
+            <button class="btn-icon btn-edit" (click)="openEdit(record)">Edit</button>
+          </div>
         </li>
       }
     </ul>
@@ -212,5 +219,60 @@
 } @else if (!loading()) {
   <div class="empty-state">
     <p>No attendance records found for {{ monthLabel() }}.</p>
+  </div>
+}
+
+@if (editStatus()) {
+  <div class="alert alert-success" role="status">{{ editStatus() }}</div>
+}
+
+@if (editOpen() && editRecord(); as r) {
+  <div class="modal-overlay" (click)="closeEdit()">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>Edit Attendance</h2>
+        <button class="btn-close" (click)="closeEdit()" aria-label="Close">&times;</button>
+      </div>
+      <form class="modal-body" (ngSubmit)="saveEdit()">
+        @if (editError()) {
+          <div class="form-error">{{ editError() }}</div>
+        }
+        <p class="modal-note">
+          Editing times for <strong>{{ utc(r.checkIn) | date: 'fullDate' }}</strong>.
+        </p>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="e-checkin">Check In</label>
+            <input
+              id="e-checkin"
+              type="time"
+              required
+              [ngModel]="editForm().checkInTime"
+              (ngModelChange)="updateEditField('checkInTime', $event)"
+              name="checkInTime"
+            />
+          </div>
+          <div class="form-group">
+            <label for="e-checkout">Check Out</label>
+            <input
+              id="e-checkout"
+              type="time"
+              [ngModel]="editForm().checkOutTime"
+              (ngModelChange)="updateEditField('checkOutTime', $event)"
+              name="checkOutTime"
+            />
+          </div>
+        </div>
+        <p class="form-note">
+          Leave Check Out blank to keep the record open (employee still on shift).
+        </p>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" (click)="closeEdit()">Cancel</button>
+          <button type="submit" class="btn btn-primary" [disabled]="editBusy()">
+            {{ editBusy() ? 'Saving…' : 'Save Changes' }}
+          </button>
+        </div>
+      </form>
+    </div>
   </div>
 }

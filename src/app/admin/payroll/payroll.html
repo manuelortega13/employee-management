@@ -1,0 +1,480 @@
+<div class="page-header no-print">
+  <h1 class="page-title">Payroll</h1>
+  <div class="header-actions">
+    <button class="btn btn-secondary" (click)="openBulk()" [disabled]="loading()">
+      Bulk Generate
+    </button>
+    <button class="btn btn-secondary" (click)="exportCsv()" [disabled]="loading()">
+      Export CSV
+    </button>
+    <button class="btn btn-primary" (click)="openGenerate()" [disabled]="loading()">
+      + Generate Payroll
+    </button>
+  </div>
+</div>
+
+@if (status()) {
+  <div class="alert alert-success no-print" role="status">{{ status() }}</div>
+}
+@if (error()) {
+  <div class="alert alert-error no-print" role="alert">{{ error() }}</div>
+}
+
+<div class="filter-bar no-print">
+  <div class="filter-tabs" role="tablist" aria-label="Filter by status">
+    <button type="button" [class.active]="filter() === 'ALL'" (click)="setFilter('ALL')">
+      All
+    </button>
+    <button type="button" [class.active]="filter() === 'DRAFT'" (click)="setFilter('DRAFT')">
+      Draft ({{ counts().DRAFT }})
+    </button>
+    <button type="button" [class.active]="filter() === 'RELEASED'" (click)="setFilter('RELEASED')">
+      Released ({{ counts().RELEASED }})
+    </button>
+    <button type="button" [class.active]="filter() === 'CANCELLED'" (click)="setFilter('CANCELLED')">
+      Cancelled ({{ counts().CANCELLED }})
+    </button>
+    <button type="button" [class.active]="filter() === 'VOIDED'" (click)="setFilter('VOIDED')">
+      Voided ({{ counts().VOIDED }})
+    </button>
+  </div>
+
+  <div class="filter-employee">
+    <label for="payroll-employee">Employee</label>
+    <select
+      id="payroll-employee"
+      [ngModel]="filterEmployeeId() ?? ''"
+      (ngModelChange)="setFilterEmployee($event)"
+      name="filterEmployee"
+    >
+      <option value="">All</option>
+      @for (e of employees(); track e.id) {
+        <option [value]="e.id">{{ e.lastName }}, {{ e.firstName }}</option>
+      }
+    </select>
+  </div>
+</div>
+
+<div class="stats-grid no-print">
+  <div class="stat-card">
+    <span class="stat-label">Records</span>
+    <span class="stat-value">{{ totals().count }}</span>
+  </div>
+  <div class="stat-card">
+    <span class="stat-label">Total Gross</span>
+    <span class="stat-value">{{ formatMoney(totals().gross) }}</span>
+  </div>
+  <div class="stat-card">
+    <span class="stat-label">Total Net</span>
+    <span class="stat-value">{{ formatMoney(totals().net) }}</span>
+  </div>
+  <div class="stat-card">
+    <span class="stat-label">Pending</span>
+    <span class="stat-value">{{ totals().pending }}</span>
+  </div>
+</div>
+
+@if (loading()) {
+  <div class="loading">Loading…</div>
+} @else if (filteredPayrolls().length === 0) {
+  <div class="empty-state">No payroll records match the current filter.</div>
+} @else {
+  <!-- Desktop table -->
+  <div class="table-wrapper">
+    <table class="payroll-table">
+      <thead>
+        <tr>
+          <th>Employee</th>
+          <th>Period</th>
+          <th>Days</th>
+          <th>Hours</th>
+          <th>Gross</th>
+          <th>Net</th>
+          <th>Status</th>
+          <th class="text-right">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (p of filteredPayrolls(); track p.id) {
+          <tr>
+            <td>{{ employeeName(p.employeeId) }}</td>
+            <td>{{ p.periodStart | date: 'MMM d' }} – {{ p.periodEnd | date: 'MMM d, y' }}</td>
+            <td>{{ p.daysComplete }}</td>
+            <td>{{ formatHours(p.totalHoursMs) }}</td>
+            <td>{{ formatMoney(p.grossSalary) }}</td>
+            <td class="font-semibold">{{ formatMoney(p.netSalary) }}</td>
+            <td><span [class]="'badge ' + statusBadge(p.status)">{{ p.status }}</span></td>
+            <td class="text-right">
+              <button class="btn-icon btn-edit" (click)="openDetail(p)">View</button>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Mobile cards -->
+  <ul class="payroll-cards" aria-label="Payroll records">
+    @for (p of filteredPayrolls(); track p.id) {
+      <li class="payroll-card" (click)="openDetail(p)">
+        <div class="card-row top">
+          <span class="card-name">{{ employeeName(p.employeeId) }}</span>
+          <span [class]="'badge ' + statusBadge(p.status)">{{ p.status }}</span>
+        </div>
+        <div class="card-row">
+          <span class="card-period">
+            {{ p.periodStart | date: 'MMM d' }} – {{ p.periodEnd | date: 'MMM d, y' }}
+          </span>
+        </div>
+        <dl class="card-grid">
+          <div class="card-grid-row">
+            <dt>Hours</dt>
+            <dd>{{ formatHours(p.totalHoursMs) }}</dd>
+          </div>
+          <div class="card-grid-row">
+            <dt>Net</dt>
+            <dd class="font-semibold">{{ formatMoney(p.netSalary) }}</dd>
+          </div>
+        </dl>
+      </li>
+    }
+  </ul>
+}
+
+<!-- Generate Modal -->
+@if (generateOpen()) {
+  <div class="modal-overlay no-print" (click)="closeGenerate()">
+    <div class="modal modal-md" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>Generate Payroll</h2>
+        <button class="btn-close" (click)="closeGenerate()" aria-label="Close">&times;</button>
+      </div>
+      <form class="modal-body" (ngSubmit)="submitGenerate()">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="g-employee">Employee</label>
+            <select
+              id="g-employee"
+              required
+              [ngModel]="generateForm().employeeId"
+              (ngModelChange)="updateGenerateField('employeeId', +$event)"
+              name="employeeId"
+            >
+              @for (e of employees(); track e.id) {
+                <option [value]="e.id">{{ e.lastName }}, {{ e.firstName }}</option>
+              }
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="g-start">Period Start</label>
+            <input
+              id="g-start"
+              type="date"
+              required
+              [ngModel]="generateForm().periodStart"
+              (ngModelChange)="updateGenerateField('periodStart', $event)"
+              name="periodStart"
+            />
+          </div>
+          <div class="form-group">
+            <label for="g-end">Period End</label>
+            <input
+              id="g-end"
+              type="date"
+              required
+              [ngModel]="generateForm().periodEnd"
+              (ngModelChange)="updateGenerateField('periodEnd', $event)"
+              name="periodEnd"
+            />
+          </div>
+        </div>
+
+        @if (preview(); as p) {
+          <div class="preview-block">
+            <h3>Computed</h3>
+            <dl>
+              <div><dt>Daily rate</dt><dd>{{ formatMoney(p.dailyRate) }}</dd></div>
+              <div><dt>Standard hours</dt><dd>{{ p.workHoursPerDay }}h / day</dd></div>
+              <div><dt>Hourly rate</dt><dd>{{ formatMoney(p.hourlyRate) }}</dd></div>
+              <div><dt>Days complete</dt><dd>{{ p.daysComplete }}</dd></div>
+              @if (p.daysIncomplete > 0) {
+                <div><dt>Days skipped (no checkout)</dt><dd>{{ p.daysIncomplete }}</dd></div>
+              }
+              <div><dt>Hours worked</dt><dd>{{ formatHours(p.totalHoursMs) }}</dd></div>
+              <div class="strong"><dt>Gross salary</dt><dd>{{ formatMoney(p.grossSalary) }}</dd></div>
+              @if (p.outstandingAdvanceCount > 0) {
+                <div class="advance-line">
+                  <dt>Cash advances ({{ p.outstandingAdvanceCount }})</dt>
+                  <dd>− {{ formatMoney(p.outstandingAdvanceTotal) }}</dd>
+                </div>
+              }
+            </dl>
+            @if (p.dailyRate === 0) {
+              <p class="warn-note">This employee has no daily rate set. Payroll will be $0.</p>
+            }
+            @if (p.outstandingAdvanceCount > 0) {
+              <p class="note">
+                Approved cash advances will be auto-deducted on generate.
+              </p>
+            }
+          </div>
+        }
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="g-deductions">Deductions</label>
+            <input
+              id="g-deductions"
+              type="number"
+              min="0"
+              step="0.01"
+              [ngModel]="generateForm().deductions"
+              (ngModelChange)="updateGenerateField('deductions', +$event || 0)"
+              name="deductions"
+            />
+          </div>
+          <div class="form-group">
+            <label for="g-bonuses">Bonuses</label>
+            <input
+              id="g-bonuses"
+              type="number"
+              min="0"
+              step="0.01"
+              [ngModel]="generateForm().bonuses"
+              (ngModelChange)="updateGenerateField('bonuses', +$event || 0)"
+              name="bonuses"
+            />
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="g-notes">Notes</label>
+            <textarea
+              id="g-notes"
+              rows="2"
+              [ngModel]="generateForm().notes"
+              (ngModelChange)="updateGenerateField('notes', $event)"
+              name="notes"
+            ></textarea>
+          </div>
+        </div>
+
+        @if (preview()) {
+          <div class="net-summary">
+            <span>Net salary</span>
+            <strong>{{ formatMoney(previewNet()) }}</strong>
+          </div>
+        }
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" (click)="closeGenerate()">Cancel</button>
+          <button type="submit" class="btn btn-primary" [disabled]="generateBusy() || !preview()">
+            {{ generateBusy() ? 'Generating…' : 'Generate Draft' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
+
+<!-- Detail / Payslip Modal -->
+@if (detailOpen() && detailRecord(); as r) {
+  <div class="modal-overlay" (click)="closeDetail()">
+    <div class="modal modal-lg payslip" (click)="$event.stopPropagation()">
+      <div class="modal-header no-print">
+        <h2>Payslip · {{ r.status }}</h2>
+        <button class="btn-close" (click)="closeDetail()" aria-label="Close">&times;</button>
+      </div>
+
+      <div class="modal-body payslip-body">
+        <div class="payslip-header">
+          <div>
+            <h3>{{ employeeName(r.employeeId) }}</h3>
+            <p class="payslip-period">
+              Period: {{ r.periodStart | date: 'fullDate' }} – {{ r.periodEnd | date: 'fullDate' }}
+            </p>
+          </div>
+          <span [class]="'badge badge-lg ' + statusBadge(r.status)">{{ r.status }}</span>
+        </div>
+
+        <section class="payslip-section">
+          <h4>Attendance</h4>
+          <dl class="info-grid">
+            <div><dt>Days complete</dt><dd>{{ r.daysComplete }}</dd></div>
+            <div><dt>Days incomplete</dt><dd>{{ r.daysIncomplete }}</dd></div>
+            <div><dt>Hours worked</dt><dd>{{ formatHours(r.totalHoursMs) }}</dd></div>
+            <div><dt>Break time</dt><dd>{{ formatHours(r.totalBreakMs) }}</dd></div>
+          </dl>
+        </section>
+
+        <section class="payslip-section">
+          <h4>Rate</h4>
+          <dl class="info-grid">
+            <div><dt>Daily rate</dt><dd>{{ formatMoney(r.dailyRate) }}</dd></div>
+            <div><dt>Standard hours</dt><dd>{{ r.workHoursPerDay }}h / day</dd></div>
+            <div><dt>Hourly rate</dt><dd>{{ formatMoney(r.hourlyRate) }}</dd></div>
+          </dl>
+        </section>
+
+        <section class="payslip-section">
+          <h4>Summary</h4>
+          @if (detailEditing()) {
+            <div class="form-row">
+              <div class="form-group">
+                <label for="e-deductions">Deductions</label>
+                <input
+                  id="e-deductions"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  [ngModel]="editForm().deductions"
+                  (ngModelChange)="updateEditField('deductions', +$event || 0)"
+                  name="editDeductions"
+                />
+              </div>
+              <div class="form-group">
+                <label for="e-bonuses">Bonuses</label>
+                <input
+                  id="e-bonuses"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  [ngModel]="editForm().bonuses"
+                  (ngModelChange)="updateEditField('bonuses', +$event || 0)"
+                  name="editBonuses"
+                />
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="e-notes">Notes</label>
+                <textarea
+                  id="e-notes"
+                  rows="2"
+                  [ngModel]="editForm().notes"
+                  (ngModelChange)="updateEditField('notes', $event)"
+                  name="editNotes"
+                ></textarea>
+              </div>
+            </div>
+          } @else {
+            <dl class="info-grid">
+              <div><dt>Gross salary</dt><dd>{{ formatMoney(r.grossSalary) }}</dd></div>
+              <div><dt>Bonuses</dt><dd>+ {{ formatMoney(r.bonuses) }}</dd></div>
+              <div><dt>Deductions</dt><dd>− {{ formatMoney(r.deductions) }}</dd></div>
+              <div class="net-line"><dt>Net salary</dt><dd>{{ formatMoney(r.netSalary) }}</dd></div>
+            </dl>
+            @if (r.notes) {
+              <p class="payslip-notes">{{ r.notes }}</p>
+            }
+          }
+        </section>
+
+        <section class="payslip-section payslip-trail">
+          <h4>Audit Trail</h4>
+          <dl class="info-grid">
+            <div><dt>Generated</dt><dd>{{ r.generatedAt | date: 'medium' }} · {{ employeeName(r.generatedById) }}</dd></div>
+            @if (r.releasedAt) {
+              <div><dt>Released</dt><dd>{{ r.releasedAt | date: 'medium' }} · {{ employeeName(r.releasedById!) }}</dd></div>
+            }
+            @if (r.cancelledAt) {
+              <div><dt>Cancelled</dt><dd>{{ r.cancelledAt | date: 'medium' }} · {{ employeeName(r.cancelledById!) }}</dd></div>
+            }
+            @if (r.voidedAt) {
+              <div><dt>Voided</dt><dd>{{ r.voidedAt | date: 'medium' }} · {{ employeeName(r.voidedById!) }}</dd></div>
+            }
+          </dl>
+        </section>
+      </div>
+
+      <div class="modal-footer payslip-footer no-print">
+        <button class="btn btn-secondary" (click)="printDetail()">Print / Save PDF</button>
+
+        @if (r.status === 'DRAFT') {
+          @if (detailEditing()) {
+            <button class="btn btn-secondary" (click)="detailEditing.set(false)">Cancel Edit</button>
+            <button class="btn btn-primary" (click)="saveEdit()">Save</button>
+          } @else {
+            <button class="btn btn-secondary" (click)="enterEditMode()">Edit</button>
+            <button class="btn btn-warn" (click)="cancel()">Cancel</button>
+            <button class="btn btn-good" (click)="release()">Release</button>
+          }
+        } @else if (r.status === 'RELEASED') {
+          <button class="btn btn-warn" (click)="voidPayroll()">Void</button>
+        }
+
+        @if (confirmDeleteId() === r.id) {
+          <span class="delete-confirm">Delete?</span>
+          <button class="btn btn-danger" (click)="deletePayroll(r.id)">Yes</button>
+          <button class="btn btn-secondary" (click)="dismissDelete()">No</button>
+        } @else {
+          <button class="btn btn-danger" (click)="confirmDelete(r.id)">Delete</button>
+        }
+      </div>
+    </div>
+  </div>
+}
+
+<!-- Bulk Generate Modal -->
+@if (bulkOpen()) {
+  <div class="modal-overlay no-print" (click)="closeBulk()">
+    <div class="modal modal-md" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>Bulk Generate</h2>
+        <button class="btn-close" (click)="closeBulk()" aria-label="Close">&times;</button>
+      </div>
+      <form class="modal-body" (ngSubmit)="runBulk()">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="b-start">Period Start</label>
+            <input
+              id="b-start"
+              type="date"
+              required
+              [ngModel]="bulkForm().periodStart"
+              (ngModelChange)="updateBulkPeriod('periodStart', $event)"
+              name="bulkStart"
+            />
+          </div>
+          <div class="form-group">
+            <label for="b-end">Period End</label>
+            <input
+              id="b-end"
+              type="date"
+              required
+              [ngModel]="bulkForm().periodEnd"
+              (ngModelChange)="updateBulkPeriod('periodEnd', $event)"
+              name="bulkEnd"
+            />
+          </div>
+        </div>
+        <p class="bulk-note">
+          Active employees with attendance in this period will get a DRAFT payroll. Those with no
+          attendance are skipped.
+        </p>
+        <div class="bulk-list">
+          @for (e of employees(); track e.id) {
+            @if (e.isActive) {
+              <label class="bulk-row">
+                <input
+                  type="checkbox"
+                  [checked]="isBulkEmployeeSelected(e.id)"
+                  (change)="toggleBulkEmployee(e.id, $any($event.target).checked)"
+                />
+                <span>{{ e.firstName }} {{ e.lastName }}</span>
+              </label>
+            }
+          }
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" (click)="closeBulk()">Cancel</button>
+          <button type="submit" class="btn btn-primary" [disabled]="bulkBusy()">
+            {{ bulkBusy() ? 'Generating…' : 'Generate Drafts' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+}

@@ -81,14 +81,37 @@ export class BackupService {
       throw new Error('Backup file is missing data tables.');
     }
 
-    await db.transaction('rw', db.employees, db.attendances, db.breaks, async () => {
-      await db.employees.clear();
-      await db.attendances.clear();
-      await db.breaks.clear();
-      if (parsed.tables.employees?.length) await db.employees.bulkAdd(parsed.tables.employees);
-      if (parsed.tables.attendances?.length) await db.attendances.bulkAdd(parsed.tables.attendances);
-      if (parsed.tables.breaks?.length) await db.breaks.bulkAdd(parsed.tables.breaks);
-    });
+    await db.transaction(
+      'rw',
+      [
+        db.employees,
+        db.attendances,
+        db.breaks,
+        db.departments,
+        db.requests,
+        db.payrolls,
+        db.cashAdvances,
+      ],
+      async () => {
+        await db.employees.clear();
+        await db.attendances.clear();
+        await db.breaks.clear();
+        await db.departments.clear();
+        await db.requests.clear();
+        await db.payrolls.clear();
+        await db.cashAdvances.clear();
+        if (parsed.tables.employees?.length) await db.employees.bulkAdd(parsed.tables.employees);
+        if (parsed.tables.attendances?.length)
+          await db.attendances.bulkAdd(parsed.tables.attendances);
+        if (parsed.tables.breaks?.length) await db.breaks.bulkAdd(parsed.tables.breaks);
+        if (parsed.tables.departments?.length)
+          await db.departments.bulkAdd(parsed.tables.departments);
+        if (parsed.tables.requests?.length) await db.requests.bulkAdd(parsed.tables.requests);
+        if (parsed.tables.payrolls?.length) await db.payrolls.bulkAdd(parsed.tables.payrolls);
+        if (parsed.tables.cashAdvances?.length)
+          await db.cashAdvances.bulkAdd(parsed.tables.cashAdvances);
+      }
+    );
   }
 
   async runScheduledBackup(): Promise<void> {
@@ -108,16 +131,29 @@ export class BackupService {
   }
 
   private async snapshot(): Promise<BackupFile> {
-    const [employees, attendances, breaks] = await Promise.all([
-      db.employees.toArray(),
-      db.attendances.toArray(),
-      db.breaks.toArray(),
-    ]);
+    const [employees, attendances, breaks, departments, requests, payrolls, cashAdvances] =
+      await Promise.all([
+        db.employees.toArray(),
+        db.attendances.toArray(),
+        db.breaks.toArray(),
+        db.departments.toArray(),
+        db.requests.toArray(),
+        db.payrolls.toArray(),
+        db.cashAdvances.toArray(),
+      ]);
     return {
       version: BACKUP_VERSION,
       schema: BACKUP_SCHEMA,
       exportedAt: new Date().toISOString(),
-      tables: { employees, attendances, breaks },
+      tables: {
+        employees,
+        attendances,
+        breaks,
+        departments,
+        requests,
+        payrolls,
+        cashAdvances,
+      },
     };
   }
 

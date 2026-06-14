@@ -54,8 +54,71 @@ export class AdminReports {
     this.filteredReports().reduce((sum, r) => sum + r.totalWorkedMs, 0)
   );
 
+  // Edit modal
+  protected readonly editOpen = signal(false);
+  protected readonly editRecord = signal<AttendanceRecord | null>(null);
+  protected readonly editForm = signal({ date: '', checkInTime: '', checkOutTime: '' });
+  protected readonly editError = signal<string | null>(null);
+  protected readonly editBusy = signal(false);
+  protected readonly editStatus = signal<string | null>(null);
+
   constructor() {
     this.loadEmployees();
+  }
+
+  protected openEdit(record: AttendanceRecord): void {
+    this.editError.set(null);
+    this.editRecord.set(record);
+    const checkInLocal = utcStringToLocalParts(record.checkIn);
+    const checkOutLocal = record.checkOut ? utcStringToLocalParts(record.checkOut) : null;
+    this.editForm.set({
+      date: record.date,
+      checkInTime: checkInLocal.time,
+      checkOutTime: checkOutLocal?.time ?? '',
+    });
+    this.editOpen.set(true);
+  }
+
+  protected closeEdit(): void {
+    this.editOpen.set(false);
+    this.editRecord.set(null);
+    this.editError.set(null);
+  }
+
+  protected updateEditField(
+    field: 'checkInTime' | 'checkOutTime',
+    value: string
+  ): void {
+    this.editForm.update((f) => ({ ...f, [field]: value }));
+  }
+
+  protected async saveEdit(): Promise<void> {
+    const r = this.editRecord();
+    if (!r) return;
+    const f = this.editForm();
+    if (!f.checkInTime) {
+      this.editError.set('Check-in time is required');
+      return;
+    }
+    this.editBusy.set(true);
+    this.editError.set(null);
+    try {
+      const checkInIso = localPartsToUtcString(f.date, f.checkInTime);
+      const checkOutIso = f.checkOutTime
+        ? localPartsToUtcString(f.date, f.checkOutTime)
+        : null;
+      await this.attendance.adminEditTimes(r.id, {
+        checkIn: checkInIso,
+        checkOut: checkOutIso,
+      });
+      this.editStatus.set('Attendance updated.');
+      this.editOpen.set(false);
+      await this.loadReport();
+    } catch (err) {
+      this.editError.set(err instanceof Error ? err.message : 'Could not update');
+    } finally {
+      this.editBusy.set(false);
+    }
   }
 
   protected async loadReport(): Promise<void> {
@@ -121,4 +184,21 @@ export class AdminReports {
       },
     });
   }
+}
+
+function utcStringToLocalParts(ts: string): { date: string; time: string } {
+  const iso = ts.endsWith('Z') ? ts : ts + 'Z';
+  const d = new Date(iso);
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return {
+    date: `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`,
+    time: `${pad(d.getHours())}:${pad(d.getMinutes())}`,
+  };
+}
+
+function localPartsToUtcString(date: string, time: string): string {
+  const [y, mo, d] = date.split('-').map(Number);
+  const [h, mi] = time.split(':').map(Number);
+  const local = new Date(y, (mo ?? 1) - 1, d ?? 1, h ?? 0, mi ?? 0, 0, 0);
+  return local.toISOString().replace(/Z$/, '');
 }

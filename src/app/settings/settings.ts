@@ -1,13 +1,15 @@
 import { Component, ElementRef, computed, inject, signal, viewChild } from '@angular/core';
 import { DatePipe } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { BackupService } from '../backup/backup.service';
 import { BrandingService } from '../branding/branding.service';
 import { applyManifest } from '../branding/manifest';
 import { StorageService } from '../data/storage.service';
+import { CURRENCIES, PreferencesService } from '../preferences/preferences.service';
 
 @Component({
   selector: 'app-settings',
-  imports: [DatePipe],
+  imports: [DatePipe, FormsModule],
   templateUrl: './settings.html',
   styleUrl: './settings.css',
 })
@@ -15,6 +17,7 @@ export class Settings {
   private readonly backup = inject(BackupService);
   private readonly storage = inject(StorageService);
   private readonly branding = inject(BrandingService);
+  private readonly preferences = inject(PreferencesService);
 
   protected readonly lastBackupAt = this.backup.lastBackupAt;
   protected readonly folderName = this.backup.folderName;
@@ -22,6 +25,9 @@ export class Settings {
   protected readonly persisted = this.storage.persisted;
   protected readonly quota = this.storage.quota;
   protected readonly logo = this.branding.logo;
+  protected readonly currency = this.preferences.currency;
+  protected readonly currencies = CURRENCIES;
+  protected readonly workHoursPerDay = this.preferences.workHoursPerDay;
 
   protected readonly status = signal<string | null>(null);
   protected readonly error = signal<string | null>(null);
@@ -131,6 +137,30 @@ export class Settings {
     } finally {
       this.busy.set(false);
     }
+  }
+
+  protected async onWorkHoursChange(value: number): Promise<void> {
+    this.reset();
+    try {
+      await this.preferences.setWorkHoursPerDay(value);
+      this.status.set('Standard work hours updated.');
+    } catch (err) {
+      this.error.set(this.errMessage(err, 'Could not update work hours.'));
+    }
+  }
+
+  protected async onCurrencyChange(code: string): Promise<void> {
+    this.reset();
+    try {
+      await this.preferences.setCurrency(code);
+      this.status.set('Currency updated.');
+    } catch (err) {
+      this.error.set(this.errMessage(err, 'Could not update currency.'));
+    }
+  }
+
+  protected previewAmount(): string {
+    return this.preferences.formatAmount(1234.5);
   }
 
   protected async removeLogo(): Promise<void> {

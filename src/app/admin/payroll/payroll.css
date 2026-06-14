@@ -1,0 +1,432 @@
+@reference "tailwindcss";
+
+.page-header {
+  @apply flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-5 sm:mb-6;
+}
+
+.page-title {
+  @apply text-xl sm:text-2xl font-bold text-slate-800;
+}
+
+.header-actions {
+  @apply flex flex-col sm:flex-row gap-2;
+}
+
+.alert {
+  @apply mb-4 px-4 py-2.5 rounded-lg text-sm border;
+}
+
+.alert-success {
+  @apply bg-emerald-50 text-emerald-700 border-emerald-200;
+}
+
+.alert-error {
+  @apply bg-rose-50 text-rose-700 border-rose-200;
+}
+
+.loading {
+  @apply text-slate-500 text-sm mb-4;
+}
+
+.empty-state {
+  @apply bg-white rounded-xl p-8 sm:p-12 shadow-sm border border-slate-200 text-center text-slate-400;
+}
+
+/* Filters */
+
+.filter-bar {
+  @apply flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 mb-5;
+}
+
+.filter-tabs {
+  @apply flex gap-2 flex-wrap;
+}
+
+.filter-tabs button {
+  @apply px-3 py-2 rounded-lg text-sm font-medium border border-slate-200 bg-white text-slate-600
+    cursor-pointer transition-colors hover:bg-slate-50
+    focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400;
+}
+
+.filter-tabs button.active {
+  @apply bg-slate-800 text-white border-slate-800;
+}
+
+.filter-employee {
+  @apply flex flex-col gap-1.5;
+}
+
+.filter-employee label {
+  @apply text-xs font-medium text-slate-500 uppercase tracking-wide;
+}
+
+.filter-employee select {
+  @apply px-3 py-2 rounded-lg border border-slate-200 text-sm text-slate-700 bg-white
+    outline-none focus:border-slate-400 focus:ring-1 focus:ring-slate-400;
+}
+
+/* Stats */
+
+.stats-grid {
+  @apply grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-5 sm:mb-6;
+}
+
+.stat-card {
+  @apply bg-white rounded-xl p-4 sm:p-5 shadow-sm border border-slate-200 flex flex-col gap-1;
+}
+
+.stat-label {
+  @apply text-xs text-slate-500 font-medium uppercase tracking-wide;
+}
+
+.stat-value {
+  @apply text-xl sm:text-2xl font-bold text-slate-800;
+}
+
+/* Table */
+
+.table-wrapper {
+  @apply hidden md:block overflow-x-auto bg-white rounded-xl shadow-sm border border-slate-200;
+}
+
+.payroll-table {
+  @apply w-full;
+}
+
+.payroll-table th {
+  @apply px-5 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider bg-slate-50;
+}
+
+.payroll-table td {
+  @apply px-5 py-3.5 text-sm text-slate-700 border-t border-slate-100;
+}
+
+.text-right {
+  @apply text-right;
+}
+
+.font-semibold {
+  @apply font-semibold text-slate-800;
+}
+
+/* Cards */
+
+.payroll-cards {
+  @apply md:hidden flex flex-col gap-3 list-none p-0 m-0;
+}
+
+.payroll-card {
+  @apply bg-white rounded-xl shadow-sm border border-slate-200 p-4 cursor-pointer transition-colors
+    hover:bg-slate-50;
+}
+
+.card-row {
+  @apply flex items-center justify-between gap-2;
+}
+
+.card-row.top {
+  @apply mb-1;
+}
+
+.card-name {
+  @apply text-sm font-semibold text-slate-800;
+}
+
+.card-period {
+  @apply text-xs text-slate-500;
+}
+
+.card-grid {
+  @apply flex justify-between m-0 mt-2 pt-2 border-t border-slate-100;
+}
+
+.card-grid-row {
+  @apply flex flex-col;
+}
+
+.card-grid-row dt {
+  @apply text-[10px] uppercase tracking-wide text-slate-500;
+}
+
+.card-grid-row dd {
+  @apply m-0 text-sm text-slate-700;
+}
+
+/* Badges */
+
+.badge {
+  @apply inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold;
+}
+
+.badge-lg {
+  @apply px-3 py-1 text-sm;
+}
+
+.badge-good {
+  @apply bg-emerald-50 text-emerald-700;
+}
+
+.badge-warn {
+  @apply bg-amber-50 text-amber-700;
+}
+
+.badge-danger {
+  @apply bg-rose-50 text-rose-700;
+}
+
+.badge-neutral {
+  @apply bg-slate-100 text-slate-500;
+}
+
+/* Buttons */
+
+.btn {
+  @apply px-4 py-2 rounded-lg font-medium text-sm cursor-pointer border-0 transition-colors
+    focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-slate-400;
+}
+
+.btn:disabled {
+  @apply opacity-50 cursor-not-allowed;
+}
+
+.btn-primary {
+  @apply bg-slate-800 text-white hover:bg-slate-900;
+}
+
+.btn-secondary {
+  @apply bg-slate-100 text-slate-700 hover:bg-slate-200;
+}
+
+.btn-good {
+  @apply bg-emerald-600 text-white hover:bg-emerald-700;
+}
+
+.btn-warn {
+  @apply bg-amber-500 text-white hover:bg-amber-600;
+}
+
+.btn-danger {
+  @apply bg-rose-600 text-white hover:bg-rose-700;
+}
+
+.btn-icon {
+  @apply px-3 py-1.5 rounded-md text-xs font-medium cursor-pointer border-0 transition-colors;
+}
+
+.btn-edit {
+  @apply bg-sky-50 text-sky-700 hover:bg-sky-100;
+}
+
+.btn-close {
+  @apply text-slate-400 hover:text-slate-600 text-2xl leading-none bg-transparent border-0 cursor-pointer p-0
+    inline-flex items-center justify-center w-9 h-9;
+}
+
+.delete-confirm {
+  @apply text-xs text-slate-500;
+}
+
+/* Modal */
+
+.modal-overlay {
+  @apply fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4;
+}
+
+.modal {
+  @apply bg-white rounded-2xl shadow-xl w-full max-h-[90vh] overflow-y-auto;
+}
+
+.modal-md {
+  @apply max-w-lg;
+}
+
+.modal-lg {
+  @apply max-w-2xl;
+}
+
+.modal-header {
+  @apply flex items-center justify-between px-4 sm:px-6 py-4 border-b border-slate-200;
+}
+
+.modal-header h2 {
+  @apply text-base sm:text-lg font-semibold text-slate-800 m-0;
+}
+
+.modal-body {
+  @apply p-4 sm:p-6;
+}
+
+.modal-footer {
+  @apply flex flex-col sm:flex-row sm:justify-end gap-2 sm:gap-3 mt-4 pt-4 border-t border-slate-100 px-4 sm:px-6 pb-4 sm:pb-6 flex-wrap;
+}
+
+.form-row {
+  @apply flex flex-col sm:flex-row gap-3 sm:gap-4 mb-4;
+}
+
+.form-group {
+  @apply flex-1 flex flex-col gap-1.5;
+}
+
+.form-group label {
+  @apply text-xs font-medium text-slate-500 uppercase tracking-wide;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  @apply px-3 py-2.5 rounded-lg border border-slate-200 text-sm text-slate-700 bg-white
+    outline-none focus:border-slate-400 focus:ring-1 focus:ring-slate-400 resize-y;
+}
+
+/* Preview block */
+
+.preview-block {
+  @apply bg-slate-50 rounded-lg p-4 mb-4 border border-slate-200;
+}
+
+.preview-block h3 {
+  @apply text-xs font-semibold uppercase tracking-wide text-slate-500 mb-2;
+}
+
+.preview-block dl {
+  @apply flex flex-col gap-1 m-0;
+}
+
+.preview-block dl > div {
+  @apply flex items-baseline justify-between text-sm gap-3;
+}
+
+.preview-block dl > div.strong {
+  @apply pt-2 border-t border-slate-200 font-semibold text-slate-800;
+}
+
+.preview-block dt {
+  @apply text-slate-500;
+}
+
+.preview-block dd {
+  @apply m-0 text-slate-700;
+}
+
+.warn-note {
+  @apply text-xs text-amber-700 mt-2 mb-0;
+}
+
+.note {
+  @apply text-xs text-slate-500 mt-2 mb-0;
+}
+
+.advance-line {
+  @apply flex items-baseline justify-between text-sm gap-3 text-sky-700;
+}
+
+.advance-line dt {
+  @apply text-sky-600;
+}
+
+.advance-line dd {
+  @apply m-0;
+}
+
+.net-summary {
+  @apply flex items-center justify-between bg-emerald-50 text-emerald-800 rounded-lg px-4 py-3 mb-2;
+}
+
+/* Payslip */
+
+.payslip-body {
+  @apply flex flex-col gap-5;
+}
+
+.payslip-header {
+  @apply flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-4 border-b border-slate-200;
+}
+
+.payslip-header h3 {
+  @apply text-lg font-bold text-slate-800 m-0;
+}
+
+.payslip-period {
+  @apply text-sm text-slate-500 m-0;
+}
+
+.payslip-section {
+  @apply m-0;
+}
+
+.payslip-section h4 {
+  @apply text-xs font-semibold uppercase tracking-wide text-slate-500 mb-2 m-0;
+}
+
+.info-grid {
+  @apply flex flex-col gap-1 m-0;
+}
+
+.info-grid > div {
+  @apply flex items-baseline justify-between gap-3 py-1 border-b border-slate-100 last:border-b-0;
+}
+
+.info-grid > div.net-line {
+  @apply font-bold text-base text-slate-800 mt-2 pt-3 border-t border-slate-300 border-b-0;
+}
+
+.info-grid dt {
+  @apply text-sm text-slate-500;
+}
+
+.info-grid dd {
+  @apply m-0 text-sm text-slate-700 text-right;
+}
+
+.payslip-notes {
+  @apply mt-3 text-sm text-slate-600 italic;
+}
+
+.payslip-trail {
+  @apply pt-3 border-t border-slate-100;
+}
+
+/* Bulk */
+
+.bulk-note {
+  @apply text-xs text-slate-500 mb-3;
+}
+
+.bulk-list {
+  @apply flex flex-col gap-1 max-h-64 overflow-y-auto bg-slate-50 rounded-lg p-3 mb-3 border border-slate-200;
+}
+
+.bulk-row {
+  @apply flex items-center gap-2 text-sm text-slate-700 cursor-pointer py-1;
+}
+
+/* Print */
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  body {
+    background: white !important;
+  }
+  .modal-overlay {
+    position: static !important;
+    background: none !important;
+    padding: 0 !important;
+    display: block !important;
+  }
+  .modal {
+    box-shadow: none !important;
+    max-width: none !important;
+    max-height: none !important;
+    overflow: visible !important;
+    border-radius: 0 !important;
+  }
+  .modal-body {
+    padding: 0 !important;
+  }
+  .payslip-section h4 {
+    color: #475569 !important;
+  }
+}

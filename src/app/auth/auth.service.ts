@@ -40,6 +40,11 @@ export class AuthService {
     this.router.navigate(['/login']);
   }
 
+  refreshFromStore(updated: AuthUser): void {
+    localStorage.setItem('auth_user', JSON.stringify(updated));
+    this.user.set(updated);
+  }
+
   redirectAfterLogin(): void {
     const user = this.user();
     if (user?.role === 'ADMIN') {

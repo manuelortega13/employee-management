@@ -1,6 +1,7 @@
 import { Component, computed, inject } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { AuthService } from '../../auth/auth.service';
+import { BrandingService } from '../../branding/branding.service';
 import { AttendanceService } from '../attendance/attendance.service';
 
 type PrimaryAction = 'checkIn' | 'checkOut' | 'done';
@@ -15,8 +16,10 @@ export class EmployeeLayout {
   private readonly auth = inject(AuthService);
   private readonly router = inject(Router);
   private readonly attendance = inject(AttendanceService);
+  private readonly branding = inject(BrandingService);
 
   protected readonly user = this.auth.user;
+  protected readonly logo = this.branding.displayLogo;
 
   protected readonly primaryAction = computed<PrimaryAction>(() => {
     const today = this.attendance.todayRecord();

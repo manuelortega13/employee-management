@@ -1,6 +1,7 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../auth.service';
+import { BrandingService } from '../../branding/branding.service';
 
 @Component({
   selector: 'app-login',
@@ -10,7 +11,9 @@ import { AuthService } from '../auth.service';
 })
 export class Login {
   private readonly auth = inject(AuthService);
+  private readonly branding = inject(BrandingService);
 
+  protected readonly logo = this.branding.displayLogo;
   protected readonly email = signal('');
   protected readonly password = signal('');
   protected readonly error = signal<string | null>(null);

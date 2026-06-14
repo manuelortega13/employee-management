@@ -1,11 +1,19 @@
 <div class="employee-container">
   <header class="topbar" role="banner">
-    <span class="topbar-title">Employee Portal</span>
+    <span class="topbar-brand">
+      @if (logo(); as src) {
+        <img [src]="src" alt="" class="topbar-logo" />
+      }
+      <span class="topbar-title">Employee Portal</span>
+    </span>
     <button type="button" class="topbar-logout" (click)="logout()">Logout</button>
   </header>
 
   <aside class="sidebar" role="navigation" aria-label="Employee navigation">
     <div class="sidebar-header">
+      @if (logo(); as src) {
+        <img [src]="src" alt="" class="sidebar-logo" />
+      }
       <h2>Employee Portal</h2>
     </div>
     <nav class="sidebar-nav">

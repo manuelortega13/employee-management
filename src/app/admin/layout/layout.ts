@@ -1,6 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { AuthService } from '../../auth/auth.service';
+import { BrandingService } from '../../branding/branding.service';
 
 @Component({
   selector: 'app-admin-layout',
@@ -10,7 +11,9 @@ import { AuthService } from '../../auth/auth.service';
 })
 export class AdminLayout {
   private readonly auth = inject(AuthService);
+  private readonly branding = inject(BrandingService);
   protected readonly user = this.auth.user;
+  protected readonly logo = this.branding.displayLogo;
 
   protected logout(): void {
     this.auth.logout();

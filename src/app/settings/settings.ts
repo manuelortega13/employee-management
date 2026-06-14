@@ -1,6 +1,8 @@
 import { Component, ElementRef, computed, inject, signal, viewChild } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { BackupService } from '../backup/backup.service';
+import { BrandingService } from '../branding/branding.service';
+import { applyManifest } from '../branding/manifest';
 import { StorageService } from '../data/storage.service';
 
 @Component({
@@ -12,12 +14,14 @@ import { StorageService } from '../data/storage.service';
 export class Settings {
   private readonly backup = inject(BackupService);
   private readonly storage = inject(StorageService);
+  private readonly branding = inject(BrandingService);
 
   protected readonly lastBackupAt = this.backup.lastBackupAt;
   protected readonly folderName = this.backup.folderName;
   protected readonly fsaSupported = this.backup.fsaSupported;
   protected readonly persisted = this.storage.persisted;
   protected readonly quota = this.storage.quota;
+  protected readonly logo = this.branding.logo;
 
   protected readonly status = signal<string | null>(null);
   protected readonly error = signal<string | null>(null);
@@ -33,6 +37,7 @@ export class Settings {
   });
 
   protected readonly importInput = viewChild<ElementRef<HTMLInputElement>>('importInput');
+  protected readonly logoInput = viewChild<ElementRef<HTMLInputElement>>('logoInput');
 
   protected async chooseFolder(): Promise<void> {
     this.reset();
@@ -79,9 +84,7 @@ export class Settings {
     input.value = '';
     if (!file) return;
 
-    const confirmed = confirm(
-      'Importing will replace all current data. Continue?'
-    );
+    const confirmed = confirm('Importing will replace all current data. Continue?');
     if (!confirmed) return;
 
     this.busy.set(true);
@@ -98,11 +101,48 @@ export class Settings {
   protected async requestPersistence(): Promise<void> {
     this.reset();
     const granted = await this.storage.requestPersistence();
-    this.status.set(
-      granted
-        ? 'Storage is now persistent — browser will not auto-evict it.'
-        : 'The browser declined persistent storage for now.'
-    );
+    if (granted) {
+      this.status.set('Storage is now persistent — browser will not auto-evict it.');
+    } else {
+      this.error.set(
+        'The browser did not grant persistent storage. On Chrome/Edge, installing this site as a PWA is the most reliable way to enable it — look for the install icon in your address bar, or use Settings → Cast/Save & Share → Install.'
+      );
+    }
+  }
+
+  protected openLogoPicker(): void {
+    this.reset();
+    this.logoInput()?.nativeElement.click();
+  }
+
+  protected async onLogoFile(event: Event): Promise<void> {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    input.value = '';
+    if (!file) return;
+
+    this.busy.set(true);
+    try {
+      await this.branding.setLogoFromFile(file);
+      applyManifest(this.branding.logo());
+      this.status.set('Logo updated. Reinstall the app to refresh the icon on already-installed PWAs.');
+    } catch (err) {
+      this.error.set(this.errMessage(err, 'Could not set logo.'));
+    } finally {
+      this.busy.set(false);
+    }
+  }
+
+  protected async removeLogo(): Promise<void> {
+    this.reset();
+    this.busy.set(true);
+    try {
+      await this.branding.clearLogo();
+      applyManifest(null);
+      this.status.set('Logo removed.');
+    } finally {
+      this.busy.set(false);
+    }
   }
 
   private reset(): void {

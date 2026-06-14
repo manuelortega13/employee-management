@@ -8,6 +8,44 @@
 }
 
 <section class="card">
+  <h2 class="card-title">Company Logo</h2>
+  <p class="card-desc">
+    Used throughout the app and as the icon for installed PWAs.
+  </p>
+
+  <div class="logo-row">
+    <div class="logo-preview" aria-hidden="true">
+      @if (logo(); as src) {
+        <img [src]="src" alt="" />
+      } @else {
+        <span class="logo-placeholder">No logo</span>
+      }
+    </div>
+    <div class="logo-actions">
+      <button class="btn btn-primary" (click)="openLogoPicker()" [disabled]="busy()">
+        {{ logo() ? 'Change logo' : 'Upload logo' }}
+      </button>
+      @if (logo()) {
+        <button class="btn btn-secondary" (click)="removeLogo()" [disabled]="busy()">
+          Remove logo
+        </button>
+      }
+      <input
+        #logoInput
+        type="file"
+        accept="image/*"
+        class="hidden-input"
+        (change)="onLogoFile($event)"
+      />
+    </div>
+  </div>
+  <p class="note">
+    Images are resized to 512×512 PNG. If you've already installed this app, you may need to
+    reinstall it for the new icon to appear in your launcher or dock.
+  </p>
+</section>
+
+<section class="card">
   <h2 class="card-title">Backups</h2>
   <p class="card-desc">
     Your data lives in this browser. Save a backup file so you can restore later or transfer to
@@ -30,7 +68,12 @@
         <dt>Backup folder</dt>
         <dd>
           @if (folderName(); as name) {
-            {{ name }}
+            <span class="folder-path">
+              <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" class="folder-icon">
+                <path fill="currentColor" d="M10 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-8z" />
+              </svg>
+              {{ name }}
+            </span>
           } @else {
             Not set
           }
@@ -38,6 +81,14 @@
       </div>
     }
   </dl>
+
+  @if (fsaSupported() && folderName()) {
+    <p class="note">
+      Browsers don't expose the full filesystem path of a chosen folder. To confirm where the
+      backups land, open the folder in your file manager from the picker shown when you click
+      <em>Change folder</em>.
+    </p>
+  }
 
   <div class="actions">
     @if (fsaSupported()) {
@@ -108,6 +159,9 @@
     </div>
     <p class="note">
       Persistent storage prevents the browser from auto-evicting your data under storage pressure.
+      Chrome and Edge grant this silently based on signals — the most reliable way is to
+      <strong>install this site as a PWA</strong> (look for the install icon in your address bar).
+      Firefox prompts you the first time you ask.
     </p>
   }
 </section>

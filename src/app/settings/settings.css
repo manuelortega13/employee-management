@@ -88,3 +88,35 @@
 .badge-neutral {
   @apply bg-slate-100 text-slate-500;
 }
+
+/* Logo */
+
+.logo-row {
+  @apply flex flex-col sm:flex-row sm:items-center gap-4;
+}
+
+.logo-preview {
+  @apply w-24 h-24 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-center overflow-hidden shrink-0;
+}
+
+.logo-preview img {
+  @apply w-full h-full object-contain;
+}
+
+.logo-placeholder {
+  @apply text-xs text-slate-400 uppercase tracking-wide;
+}
+
+.logo-actions {
+  @apply flex flex-col sm:flex-row gap-2 sm:gap-3;
+}
+
+/* Folder display */
+
+.folder-path {
+  @apply inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 font-mono text-xs;
+}
+
+.folder-icon {
+  @apply w-4 h-4 text-amber-500;
+}

@@ -1,11 +1,11 @@
 @reference "tailwindcss";
 
 .page-header {
-  @apply flex items-center justify-between mb-6;
+  @apply flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-5 sm:mb-6;
 }
 
 .page-title {
-  @apply text-2xl font-bold text-slate-800;
+  @apply text-xl sm:text-2xl font-bold text-slate-800;
 }
 
 .loading {
@@ -16,10 +16,16 @@
   @apply mb-4 px-4 py-2.5 rounded-lg bg-rose-50 text-rose-700 text-sm border border-rose-200;
 }
 
+/* Visually hidden but accessible to screen readers */
+.sr-only {
+  @apply absolute w-px h-px p-0 -m-px overflow-hidden whitespace-nowrap border-0;
+  clip: rect(0, 0, 0, 0);
+}
+
 /* Search */
 
 .search-bar {
-  @apply mb-6;
+  @apply mb-5 sm:mb-6;
 }
 
 .search-input {
@@ -27,10 +33,14 @@
     text-slate-700 placeholder-slate-400 outline-none focus:border-slate-400 focus:ring-1 focus:ring-slate-400;
 }
 
-/* Table */
+/* Table — desktop */
+
+.table-wrapper {
+  @apply hidden md:block overflow-x-auto bg-white rounded-xl shadow-sm border border-slate-200;
+}
 
 .employee-table {
-  @apply w-full bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden;
+  @apply w-full;
 }
 
 .employee-table th {
@@ -43,6 +53,44 @@
 
 .empty-row {
   @apply text-center text-slate-400 py-8;
+}
+
+/* Cards — mobile */
+
+.employee-cards {
+  @apply md:hidden flex flex-col gap-3 list-none p-0 m-0;
+}
+
+.employee-card {
+  @apply bg-white rounded-xl shadow-sm border border-slate-200 p-4 flex flex-col gap-3;
+}
+
+.employee-card-header {
+  @apply flex items-center justify-between gap-3 pb-2 border-b border-slate-100;
+}
+
+.employee-card-name {
+  @apply text-sm font-semibold text-slate-800;
+}
+
+.employee-card-grid {
+  @apply flex flex-col gap-2 m-0;
+}
+
+.employee-card-row {
+  @apply flex items-baseline justify-between gap-3;
+}
+
+.employee-card-row dt {
+  @apply text-xs font-medium text-slate-500 uppercase tracking-wide;
+}
+
+.employee-card-row dd {
+  @apply m-0 text-sm text-slate-700 text-right;
+}
+
+.empty-row-card {
+  @apply bg-white rounded-xl p-6 shadow-sm border border-slate-200 text-center text-slate-400 list-none;
 }
 
 /* Badges */
@@ -66,7 +114,8 @@
 /* Buttons */
 
 .btn {
-  @apply px-4 py-2 rounded-lg font-medium text-sm cursor-pointer border-0 transition-colors;
+  @apply px-4 py-2.5 rounded-lg font-medium text-sm cursor-pointer border-0 transition-colors
+    focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-slate-400;
 }
 
 .btn-primary {
@@ -82,7 +131,8 @@
 }
 
 .btn-icon {
-  @apply px-2.5 py-1 rounded-md text-xs font-medium cursor-pointer border-0 transition-colors;
+  @apply px-3 py-1.5 rounded-md text-xs font-medium cursor-pointer border-0 transition-colors
+    focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-1 focus-visible:ring-slate-400;
 }
 
 .btn-edit {
@@ -98,37 +148,38 @@
 }
 
 .delete-confirm {
-  @apply flex items-center gap-2 text-xs text-slate-500;
+  @apply flex items-center gap-2 text-xs text-slate-500 flex-wrap;
 }
 
 /* Modal */
 
 .modal-overlay {
-  @apply fixed inset-0 bg-black/50 flex items-center justify-center z-50;
+  @apply fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4;
 }
 
 .modal {
-  @apply bg-white rounded-2xl shadow-xl w-full max-w-xl mx-4 overflow-hidden;
+  @apply bg-white rounded-2xl shadow-xl w-full max-w-xl max-h-[90vh] overflow-y-auto;
 }
 
 .modal-header {
-  @apply flex items-center justify-between px-6 py-4 border-b border-slate-200;
+  @apply flex items-center justify-between px-4 sm:px-6 py-4 border-b border-slate-200;
 }
 
 .modal-header h2 {
-  @apply text-lg font-semibold text-slate-800 m-0;
+  @apply text-base sm:text-lg font-semibold text-slate-800 m-0;
 }
 
 .btn-close {
-  @apply text-slate-400 hover:text-slate-600 text-2xl leading-none bg-transparent border-0 cursor-pointer p-0;
+  @apply text-slate-400 hover:text-slate-600 text-2xl leading-none bg-transparent border-0 cursor-pointer p-0
+    inline-flex items-center justify-center w-9 h-9;
 }
 
 .modal-body {
-  @apply p-6;
+  @apply p-4 sm:p-6;
 }
 
 .form-row {
-  @apply flex gap-4 mb-4;
+  @apply flex flex-col sm:flex-row gap-4 mb-4;
 }
 
 .form-group {
@@ -141,7 +192,7 @@
 
 .form-group input,
 .form-group select {
-  @apply px-3 py-2 rounded-lg border border-slate-200 text-sm text-slate-700
+  @apply px-3 py-2.5 rounded-lg border border-slate-200 text-sm text-slate-700
     outline-none focus:border-slate-400 focus:ring-1 focus:ring-slate-400;
 }
 
@@ -150,5 +201,5 @@
 }
 
 .modal-footer {
-  @apply flex justify-end gap-3 mt-6;
+  @apply flex flex-col-reverse sm:flex-row sm:justify-end gap-3 mt-6;
 }

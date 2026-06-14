@@ -8,7 +8,9 @@
 }
 
 <div class="search-bar">
+  <label for="employee-search" class="sr-only">Search employees</label>
   <input
+    id="employee-search"
     type="text"
     placeholder="Search by name, email, or position..."
     [ngModel]="searchQuery()"
@@ -17,64 +19,115 @@
   />
 </div>
 
-<table class="employee-table">
-  <thead>
-    <tr>
-      <th>Name</th>
-      <th>Email</th>
-      <th>Position</th>
-      <th>Role</th>
-      <th>Hire Date</th>
-      <th>Status</th>
-      <th>Actions</th>
-    </tr>
-  </thead>
-  <tbody>
-    @for (employee of filteredEmployees(); track employee.id) {
+<div class="table-wrapper">
+  <table class="employee-table">
+    <thead>
       <tr>
-        <td>{{ employee.firstName }} {{ employee.lastName }}</td>
-        <td>{{ employee.email }}</td>
-        <td>{{ employee.position }}</td>
-        <td>
-          <span [class]="employee.role === 'ADMIN' ? 'badge-admin' : 'badge-employee'">
-            {{ employee.role }}
-          </span>
-        </td>
-        <td>{{ employee.hireDate | date: 'mediumDate' }}</td>
-        <td>
-          <span [class]="employee.isActive ? 'badge-active' : 'badge-inactive'">
-            {{ employee.isActive ? 'Active' : 'Inactive' }}
-          </span>
-        </td>
-        <td>
-          @if (deleteConfirmId() === employee.id) {
-            <div class="delete-confirm">
-              <span>Delete?</span>
-              <button class="btn-icon btn-danger" (click)="deleteEmployee(employee.id)">Yes</button>
-              <button class="btn-icon btn-secondary" (click)="cancelDelete()">No</button>
-            </div>
-          } @else {
-            <div class="action-buttons">
-              <button class="btn-icon btn-edit" (click)="openEdit(employee)">Edit</button>
-              <button class="btn-icon btn-danger" (click)="confirmDelete(employee.id)">Delete</button>
-            </div>
-          }
-        </td>
+        <th>Name</th>
+        <th>Email</th>
+        <th>Position</th>
+        <th>Role</th>
+        <th>Hire Date</th>
+        <th>Status</th>
+        <th>Actions</th>
       </tr>
-    } @empty {
-      <tr>
-        <td colspan="7" class="empty-row">No employees found.</td>
-      </tr>
-    }
-  </tbody>
-</table>
+    </thead>
+    <tbody>
+      @for (employee of filteredEmployees(); track employee.id) {
+        <tr>
+          <td>{{ employee.firstName }} {{ employee.lastName }}</td>
+          <td>{{ employee.email }}</td>
+          <td>{{ employee.position }}</td>
+          <td>
+            <span [class]="employee.role === 'ADMIN' ? 'badge-admin' : 'badge-employee'">
+              {{ employee.role }}
+            </span>
+          </td>
+          <td>{{ employee.hireDate | date: 'mediumDate' }}</td>
+          <td>
+            <span [class]="employee.isActive ? 'badge-active' : 'badge-inactive'">
+              {{ employee.isActive ? 'Active' : 'Inactive' }}
+            </span>
+          </td>
+          <td>
+            @if (deleteConfirmId() === employee.id) {
+              <div class="delete-confirm">
+                <span>Delete?</span>
+                <button class="btn-icon btn-danger" (click)="deleteEmployee(employee.id)">Yes</button>
+                <button class="btn-icon btn-secondary" (click)="cancelDelete()">No</button>
+              </div>
+            } @else {
+              <div class="action-buttons">
+                <button class="btn-icon btn-edit" (click)="openEdit(employee)">Edit</button>
+                <button class="btn-icon btn-danger" (click)="confirmDelete(employee.id)">Delete</button>
+              </div>
+            }
+          </td>
+        </tr>
+      } @empty {
+        <tr>
+          <td colspan="7" class="empty-row">No employees found.</td>
+        </tr>
+      }
+    </tbody>
+  </table>
+</div>
+
+<ul class="employee-cards" aria-label="Employees">
+  @for (employee of filteredEmployees(); track employee.id) {
+    <li class="employee-card">
+      <div class="employee-card-header">
+        <span class="employee-card-name">{{ employee.firstName }} {{ employee.lastName }}</span>
+        <span [class]="employee.role === 'ADMIN' ? 'badge-admin' : 'badge-employee'">
+          {{ employee.role }}
+        </span>
+      </div>
+      <dl class="employee-card-grid">
+        <div class="employee-card-row">
+          <dt>Email</dt>
+          <dd class="break-all">{{ employee.email }}</dd>
+        </div>
+        <div class="employee-card-row">
+          <dt>Position</dt>
+          <dd>{{ employee.position || '-' }}</dd>
+        </div>
+        <div class="employee-card-row">
+          <dt>Hire Date</dt>
+          <dd>{{ employee.hireDate | date: 'mediumDate' }}</dd>
+        </div>
+        <div class="employee-card-row">
+          <dt>Status</dt>
+          <dd>
+            <span [class]="employee.isActive ? 'badge-active' : 'badge-inactive'">
+              {{ employee.isActive ? 'Active' : 'Inactive' }}
+            </span>
+          </dd>
+        </div>
+      </dl>
+      @if (deleteConfirmId() === employee.id) {
+        <div class="delete-confirm">
+          <span>Delete?</span>
+          <button class="btn-icon btn-danger" (click)="deleteEmployee(employee.id)">Yes</button>
+          <button class="btn-icon btn-secondary" (click)="cancelDelete()">No</button>
+        </div>
+      } @else {
+        <div class="action-buttons">
+          <button class="btn-icon btn-edit" (click)="openEdit(employee)">Edit</button>
+          <button class="btn-icon btn-danger" (click)="confirmDelete(employee.id)">Delete</button>
+        </div>
+      }
+    </li>
+  } @empty {
+    <li class="empty-row-card">No employees found.</li>
+  }
+</ul>
 
 @if (modalOpen()) {
   <div class="modal-overlay" (click)="closeModal()">
     <div class="modal" (click)="$event.stopPropagation()">
       <div class="modal-header">
         <h2>{{ editingEmployee() ? 'Edit Employee' : 'Add Employee' }}</h2>
-        <button class="btn-close" (click)="closeModal()">&times;</button>
+        <button class="btn-close" (click)="closeModal()" aria-label="Close">&times;</button>
       </div>
       <form class="modal-body" (ngSubmit)="save()">
         @if (error()) {

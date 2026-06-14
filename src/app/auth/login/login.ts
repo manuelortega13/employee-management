@@ -27,7 +27,7 @@ export class Login {
       },
       error: (err) => {
         this.loading.set(false);
-        this.error.set(err.error?.message ?? 'Invalid email or password');
+        this.error.set(err?.message ?? 'Invalid email or password');
       },
     });
   }

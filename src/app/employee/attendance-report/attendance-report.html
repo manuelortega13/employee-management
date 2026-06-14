@@ -1,9 +1,9 @@
 <h1 class="page-title">Attendance Report</h1>
 
 <div class="month-nav">
-  <button class="nav-btn" (click)="previousMonth()">&larr;</button>
+  <button class="nav-btn" (click)="previousMonth()" aria-label="Previous month">&larr;</button>
   <span class="month-label">{{ monthLabel() }}</span>
-  <button class="nav-btn" (click)="nextMonth()">&rarr;</button>
+  <button class="nav-btn" (click)="nextMonth()" aria-label="Next month">&rarr;</button>
 </div>
 
 <div class="stats-grid">
@@ -26,44 +26,85 @@
 </div>
 
 @if (monthRecords().length > 0) {
-  <table class="report-table">
-    <thead>
-      <tr>
-        <th>Date</th>
-        <th>Check In</th>
-        <th>Check Out</th>
-        <th>Hours Worked</th>
-        <th>Status</th>
-      </tr>
-    </thead>
-    <tbody>
-      @for (record of monthRecords(); track record.date) {
+  <div class="table-wrapper">
+    <table class="report-table">
+      <thead>
         <tr>
-          <td>{{ utc(record.checkIn) | date: 'EEE, MMM d' }}</td>
-          <td>{{ utc(record.checkIn) | date: 'hh:mm:ss a' }}</td>
-          <td>
-            @if (record.checkOut) {
-              {{ utc(record.checkOut!) | date: 'hh:mm:ss a' }}
-            } @else {
-              -
-            }
-          </td>
-          <td>
-            @if (record.checkOut) {
-              {{ formatDuration(getWorkedMs(record)) }}
-            } @else {
-              -
-            }
-          </td>
-          <td>
-            <span [class]="record.checkOut ? 'badge-complete' : 'badge-progress'">
-              {{ getStatus(record) }}
-            </span>
-          </td>
+          <th>Date</th>
+          <th>Check In</th>
+          <th>Check Out</th>
+          <th>Hours Worked</th>
+          <th>Status</th>
         </tr>
-      }
-    </tbody>
-  </table>
+      </thead>
+      <tbody>
+        @for (record of monthRecords(); track record.date) {
+          <tr>
+            <td>{{ utc(record.checkIn) | date: 'EEE, MMM d' }}</td>
+            <td>{{ utc(record.checkIn) | date: 'hh:mm:ss a' }}</td>
+            <td>
+              @if (record.checkOut) {
+                {{ utc(record.checkOut!) | date: 'hh:mm:ss a' }}
+              } @else {
+                -
+              }
+            </td>
+            <td>
+              @if (record.checkOut) {
+                {{ formatDuration(getWorkedMs(record)) }}
+              } @else {
+                -
+              }
+            </td>
+            <td>
+              <span [class]="record.checkOut ? 'badge-complete' : 'badge-progress'">
+                {{ getStatus(record) }}
+              </span>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+
+  <ul class="report-cards" aria-label="Attendance report">
+    @for (record of monthRecords(); track record.date) {
+      <li class="report-card">
+        <div class="report-card-header">
+          <span class="report-card-date">{{ utc(record.checkIn) | date: 'EEE, MMM d' }}</span>
+          <span [class]="record.checkOut ? 'badge-complete' : 'badge-progress'">
+            {{ getStatus(record) }}
+          </span>
+        </div>
+        <dl class="report-card-grid">
+          <div class="report-card-row">
+            <dt>Check In</dt>
+            <dd>{{ utc(record.checkIn) | date: 'hh:mm:ss a' }}</dd>
+          </div>
+          <div class="report-card-row">
+            <dt>Check Out</dt>
+            <dd>
+              @if (record.checkOut) {
+                {{ utc(record.checkOut!) | date: 'hh:mm:ss a' }}
+              } @else {
+                -
+              }
+            </dd>
+          </div>
+          <div class="report-card-row">
+            <dt>Hours</dt>
+            <dd>
+              @if (record.checkOut) {
+                {{ formatDuration(getWorkedMs(record)) }}
+              } @else {
+                -
+              }
+            </dd>
+          </div>
+        </dl>
+      </li>
+    }
+  </ul>
 } @else {
   <div class="empty-state">
     <p>No attendance records for {{ monthLabel() }}.</p>

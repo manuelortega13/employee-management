@@ -109,66 +109,127 @@
 
 @if (records().length > 0) {
   <h2 class="section-title">History</h2>
-  <table class="history-table">
-    <thead>
-      <tr>
-        <th>Date</th>
-        <th>Check In</th>
-        <th>Selfie</th>
-        <th>Check Out</th>
-        <th>Selfie</th>
-        <th>Break Time</th>
-        <th>Total Hours</th>
-      </tr>
-    </thead>
-    <tbody>
-      @for (record of records(); track record.date) {
+
+  <!-- Desktop / tablet table -->
+  <div class="table-wrapper">
+    <table class="history-table">
+      <thead>
         <tr>
-          <td>{{ utc(record.checkIn) | date: 'mediumDate' }}</td>
-          <td>{{ utc(record.checkIn) | date: 'hh:mm:ss a' }}</td>
-          <td>
-            <img [src]="record.checkInPhoto" alt="Check-in selfie" class="table-selfie clickable" (click)="openPreview(record.checkInPhoto)" />
-          </td>
-          <td>
-            @if (record.checkOut) {
-              {{ utc(record.checkOut!) | date: 'hh:mm:ss a' }}
-            } @else {
-              <span class="status-active">In progress</span>
-            }
-          </td>
-          <td>
-            @if (record.checkOutPhoto) {
-              <img [src]="record.checkOutPhoto" alt="Check-out selfie" class="table-selfie clickable" (click)="openPreview(record.checkOutPhoto!)" />
-            } @else {
-              <span class="text-slate-400">-</span>
-            }
-          </td>
-          <td>
-            @if (record.breaks.length > 0) {
-              <div>{{ formatBreakDuration(record) }}</div>
-              <div class="break-selfies-row">
-                @for (b of record.breaks; track b.id) {
-                  <img [src]="b.startPhoto" alt="Break start" class="table-selfie clickable" (click)="openPreview(b.startPhoto)" />
-                  @if (b.endPhoto) {
-                    <img [src]="b.endPhoto" alt="Break end" class="table-selfie clickable" (click)="openPreview(b.endPhoto!)" />
-                  }
-                }
-              </div>
-            } @else {
-              -
-            }
-          </td>
-          <td>
-            @if (record.checkOut) {
-              {{ formatDuration(record) }}
-            } @else {
-              <span class="status-active">In progress</span>
-            }
-          </td>
+          <th>Date</th>
+          <th>Check In</th>
+          <th>Selfie</th>
+          <th>Check Out</th>
+          <th>Selfie</th>
+          <th>Break Time</th>
+          <th>Total Hours</th>
         </tr>
-      }
-    </tbody>
-  </table>
+      </thead>
+      <tbody>
+        @for (record of records(); track record.date) {
+          <tr>
+            <td>{{ utc(record.checkIn) | date: 'mediumDate' }}</td>
+            <td>{{ utc(record.checkIn) | date: 'hh:mm:ss a' }}</td>
+            <td>
+              <img [src]="record.checkInPhoto" alt="Check-in selfie" class="table-selfie clickable" (click)="openPreview(record.checkInPhoto)" />
+            </td>
+            <td>
+              @if (record.checkOut) {
+                {{ utc(record.checkOut!) | date: 'hh:mm:ss a' }}
+              } @else {
+                <span class="status-active">In progress</span>
+              }
+            </td>
+            <td>
+              @if (record.checkOutPhoto) {
+                <img [src]="record.checkOutPhoto" alt="Check-out selfie" class="table-selfie clickable" (click)="openPreview(record.checkOutPhoto!)" />
+              } @else {
+                <span class="text-slate-400">-</span>
+              }
+            </td>
+            <td>
+              @if (record.breaks.length > 0) {
+                <div>{{ formatBreakDuration(record) }}</div>
+                <div class="break-selfies-row">
+                  @for (b of record.breaks; track b.id) {
+                    <img [src]="b.startPhoto" alt="Break start" class="table-selfie clickable" (click)="openPreview(b.startPhoto)" />
+                    @if (b.endPhoto) {
+                      <img [src]="b.endPhoto" alt="Break end" class="table-selfie clickable" (click)="openPreview(b.endPhoto!)" />
+                    }
+                  }
+                </div>
+              } @else {
+                -
+              }
+            </td>
+            <td>
+              @if (record.checkOut) {
+                {{ formatDuration(record) }}
+              } @else {
+                <span class="status-active">In progress</span>
+              }
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Mobile card list -->
+  <ul class="history-cards" aria-label="Attendance history">
+    @for (record of records(); track record.date) {
+      <li class="history-card">
+        <div class="history-card-date">{{ utc(record.checkIn) | date: 'fullDate' }}</div>
+        <dl class="history-card-grid">
+          <div class="history-card-row">
+            <dt>Check In</dt>
+            <dd class="history-card-time">
+              <span>{{ utc(record.checkIn) | date: 'hh:mm:ss a' }}</span>
+              <img [src]="record.checkInPhoto" alt="Check-in selfie" class="table-selfie clickable" (click)="openPreview(record.checkInPhoto)" />
+            </dd>
+          </div>
+          <div class="history-card-row">
+            <dt>Check Out</dt>
+            <dd class="history-card-time">
+              @if (record.checkOut) {
+                <span>{{ utc(record.checkOut!) | date: 'hh:mm:ss a' }}</span>
+                @if (record.checkOutPhoto) {
+                  <img [src]="record.checkOutPhoto" alt="Check-out selfie" class="table-selfie clickable" (click)="openPreview(record.checkOutPhoto!)" />
+                }
+              } @else {
+                <span class="status-active">In progress</span>
+              }
+            </dd>
+          </div>
+          @if (record.breaks.length > 0) {
+            <div class="history-card-row">
+              <dt>Break Time</dt>
+              <dd>
+                <div>{{ formatBreakDuration(record) }}</div>
+                <div class="break-selfies-row">
+                  @for (b of record.breaks; track b.id) {
+                    <img [src]="b.startPhoto" alt="Break start" class="table-selfie clickable" (click)="openPreview(b.startPhoto)" />
+                    @if (b.endPhoto) {
+                      <img [src]="b.endPhoto" alt="Break end" class="table-selfie clickable" (click)="openPreview(b.endPhoto!)" />
+                    }
+                  }
+                </div>
+              </dd>
+            </div>
+          }
+          <div class="history-card-row">
+            <dt>Total Hours</dt>
+            <dd>
+              @if (record.checkOut) {
+                {{ formatDuration(record) }}
+              } @else {
+                <span class="status-active">In progress</span>
+              }
+            </dd>
+          </div>
+        </dl>
+      </li>
+    }
+  </ul>
 }
 
 @if (previewPhoto()) {

@@ -114,7 +114,7 @@ export class AdminEmployees {
           this.closeModal();
           this.loadEmployees();
         },
-        error: (err) => this.error.set(err.error?.message ?? 'Failed to update employee'),
+        error: (err) => this.error.set(err?.message ?? 'Failed to update employee'),
       });
     } else {
       const request: EmployeeCreateRequest = {
@@ -133,7 +133,7 @@ export class AdminEmployees {
           this.closeModal();
           this.loadEmployees();
         },
-        error: (err) => this.error.set(err.error?.message ?? 'Failed to create employee'),
+        error: (err) => this.error.set(err?.message ?? 'Failed to create employee'),
       });
     }
   }

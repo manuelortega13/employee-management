@@ -1,6 +1,7 @@
-import { HttpClient } from '@angular/common/http';
 import { computed, inject, Injectable, signal } from '@angular/core';
 import { AuthService } from '../../auth/auth.service';
+import { db } from '../../data/db';
+import { AttendanceRecordRow, BreakRecordRow } from '../../data/types';
 
 export interface BreakRecord {
   id: number;
@@ -25,7 +26,6 @@ export interface AttendanceRecord {
 
 @Injectable({ providedIn: 'root' })
 export class AttendanceService {
-  private readonly http = inject(HttpClient);
   private readonly auth = inject(AuthService);
 
   readonly records = signal<AttendanceRecord[]>([]);
@@ -48,66 +48,62 @@ export class AttendanceService {
 
   loadRecords(): void {
     this.loading.set(true);
-    this.http.get<AttendanceRecord[]>(`/api/attendance/employee/${this.employeeId}`).subscribe({
-      next: (records) => {
+    this.queryRecords(this.employeeId)
+      .then((records) => {
         this.records.set(records);
         this.loading.set(false);
-      },
-      error: () => this.loading.set(false),
-    });
+      })
+      .catch(() => this.loading.set(false));
   }
 
   checkIn(photo: string, onSuccess: () => void, onError: (msg: string) => void): void {
-    this.http
-      .post<AttendanceRecord>('/api/attendance/check-in', {
-        employeeId: this.employeeId,
-        checkInPhoto: photo,
-      })
-      .subscribe({
-        next: () => {
-          this.loadRecords();
-          onSuccess();
-        },
-        error: (err) => onError(err.error?.message ?? 'Check-in failed'),
-      });
+    this.runMutation(
+      () => this.performCheckIn(photo),
+      onSuccess,
+      onError,
+      'Check-in failed'
+    );
   }
 
   checkOut(photo: string, onSuccess: () => void, onError: (msg: string) => void): void {
-    this.http
-      .put<AttendanceRecord>(`/api/attendance/employee/${this.employeeId}/check-out`, {
-        checkOutPhoto: photo,
-      })
-      .subscribe({
-        next: () => {
-          this.loadRecords();
-          onSuccess();
-        },
-        error: (err) => onError(err.error?.message ?? 'Check-out failed'),
-      });
+    this.runMutation(
+      () => this.performCheckOut(photo),
+      onSuccess,
+      onError,
+      'Check-out failed'
+    );
   }
 
   startBreak(photo: string, onSuccess: () => void, onError: (msg: string) => void): void {
-    this.http
-      .post<BreakRecord>(`/api/breaks/employee/${this.employeeId}/start`, { startPhoto: photo })
-      .subscribe({
-        next: () => {
-          this.loadRecords();
-          onSuccess();
-        },
-        error: (err) => onError(err.error?.message ?? 'Failed to start break'),
-      });
+    this.runMutation(
+      () => this.performStartBreak(photo),
+      onSuccess,
+      onError,
+      'Failed to start break'
+    );
   }
 
   endBreak(photo: string, onSuccess: () => void, onError: (msg: string) => void): void {
-    this.http
-      .put<BreakRecord>(`/api/breaks/employee/${this.employeeId}/end`, { endPhoto: photo })
-      .subscribe({
-        next: () => {
-          this.loadRecords();
-          onSuccess();
-        },
-        error: (err) => onError(err.error?.message ?? 'Failed to end break'),
-      });
+    this.runMutation(
+      () => this.performEndBreak(photo),
+      onSuccess,
+      onError,
+      'Failed to end break'
+    );
+  }
+
+  async getRecordsForEmployeeMonth(
+    employeeId: number,
+    year: number,
+    month: number
+  ): Promise<AttendanceRecord[]> {
+    const prefix = `${year}-${String(month).padStart(2, '0')}`;
+    const rows = await db.attendances
+      .where('employeeId')
+      .equals(employeeId)
+      .filter((r) => r.date.startsWith(prefix))
+      .toArray();
+    return this.hydrateRecords(rows);
   }
 
   getRecordsForMonth(year: number, month: number): AttendanceRecord[] {
@@ -137,4 +133,167 @@ export class AttendanceService {
     const minutes = totalMinutes % 60;
     return `${hours}h ${minutes}m`;
   }
+
+  private runMutation(
+    op: () => Promise<void>,
+    onSuccess: () => void,
+    onError: (msg: string) => void,
+    fallbackMessage: string
+  ): void {
+    op()
+      .then(() => {
+        this.loadRecords();
+        onSuccess();
+      })
+      .catch((err: unknown) => {
+        const message = err instanceof Error ? err.message : fallbackMessage;
+        onError(message || fallbackMessage);
+      });
+  }
+
+  private async performCheckIn(photo: string): Promise<void> {
+    const employeeId = this.employeeId;
+    const date = this.formatDate(new Date());
+    const existing = await db.attendances
+      .where('[employeeId+date]')
+      .equals([employeeId, date])
+      .first();
+    if (existing) throw new Error('Already checked in today');
+
+    const now = nowUtcString();
+    await db.attendances.add({
+      id: undefined as unknown as number,
+      employeeId,
+      date,
+      checkIn: now,
+      checkInPhoto: photo,
+      checkOut: null,
+      checkOutPhoto: null,
+      totalBreakMs: 0,
+      createdAt: now,
+      updatedAt: now,
+    });
+  }
+
+  private async performCheckOut(photo: string): Promise<void> {
+    const today = await this.todayRow();
+    if (!today) throw new Error('No active check-in to close');
+    if (today.checkOut) throw new Error('Already checked out today');
+
+    const openBreak = await db.breaks
+      .where('attendanceId')
+      .equals(today.id)
+      .filter((b) => b.endTime === null)
+      .first();
+    if (openBreak) throw new Error('End your current break before checking out');
+
+    const now = nowUtcString();
+    await db.attendances.update(today.id, {
+      checkOut: now,
+      checkOutPhoto: photo,
+      updatedAt: now,
+    });
+  }
+
+  private async performStartBreak(photo: string): Promise<void> {
+    const today = await this.todayRow();
+    if (!today) throw new Error('Check in before starting a break');
+    if (today.checkOut) throw new Error('You have already checked out today');
+
+    const openBreak = await db.breaks
+      .where('attendanceId')
+      .equals(today.id)
+      .filter((b) => b.endTime === null)
+      .first();
+    if (openBreak) throw new Error('You already have an active break');
+
+    const now = nowUtcString();
+    await db.breaks.add({
+      id: undefined as unknown as number,
+      attendanceId: today.id,
+      startTime: now,
+      startPhoto: photo,
+      endTime: null,
+      endPhoto: null,
+      createdAt: now,
+      updatedAt: now,
+    });
+  }
+
+  private async performEndBreak(photo: string): Promise<void> {
+    const today = await this.todayRow();
+    if (!today) throw new Error('No active check-in');
+
+    const openBreak = await db.breaks
+      .where('attendanceId')
+      .equals(today.id)
+      .filter((b) => b.endTime === null)
+      .first();
+    if (!openBreak) throw new Error('No active break to end');
+
+    const now = nowUtcString();
+    const duration =
+      new Date(this.toLocalTime(now)).getTime() -
+      new Date(this.toLocalTime(openBreak.startTime)).getTime();
+
+    await db.transaction('rw', db.breaks, db.attendances, async () => {
+      await db.breaks.update(openBreak.id, {
+        endTime: now,
+        endPhoto: photo,
+        updatedAt: now,
+      });
+      await db.attendances.update(today.id, {
+        totalBreakMs: (today.totalBreakMs ?? 0) + Math.max(0, duration),
+        updatedAt: now,
+      });
+    });
+  }
+
+  private async todayRow(): Promise<AttendanceRecordRow | undefined> {
+    const date = this.formatDate(new Date());
+    return db.attendances.where('[employeeId+date]').equals([this.employeeId, date]).first();
+  }
+
+  private async queryRecords(employeeId: number): Promise<AttendanceRecord[]> {
+    const rows = await db.attendances.where('employeeId').equals(employeeId).toArray();
+    rows.sort((a, b) => (a.date < b.date ? 1 : -1));
+    return this.hydrateRecords(rows);
+  }
+
+  private async hydrateRecords(rows: AttendanceRecordRow[]): Promise<AttendanceRecord[]> {
+    if (rows.length === 0) return [];
+    const ids = rows.map((r) => r.id);
+    const allBreaks = await db.breaks.where('attendanceId').anyOf(ids).toArray();
+    const breakMap = new Map<number, BreakRecordRow[]>();
+    for (const b of allBreaks) {
+      const list = breakMap.get(b.attendanceId) ?? [];
+      list.push(b);
+      breakMap.set(b.attendanceId, list);
+    }
+    for (const [, list] of breakMap) {
+      list.sort((a, b) => (a.startTime < b.startTime ? -1 : 1));
+    }
+    return rows.map((row) => ({
+      id: row.id,
+      employeeId: row.employeeId,
+      date: row.date,
+      checkIn: row.checkIn,
+      checkInPhoto: row.checkInPhoto,
+      checkOut: row.checkOut,
+      checkOutPhoto: row.checkOutPhoto,
+      totalBreakMs: row.totalBreakMs ?? 0,
+      breaks: (breakMap.get(row.id) ?? []).map((b) => ({
+        id: b.id,
+        attendanceId: b.attendanceId,
+        startTime: b.startTime,
+        startPhoto: b.startPhoto,
+        endTime: b.endTime,
+        endPhoto: b.endPhoto,
+      })),
+    }));
+  }
+}
+
+function nowUtcString(): string {
+  return new Date().toISOString().replace(/Z$/, '');
 }

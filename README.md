@@ -10,7 +10,16 @@ To start a local development server, run:
 ng serve
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+Once the server is running, open your browser and navigate to `http://localhost:4202/`. The application will automatically reload whenever you modify any of the source files.
+
+## Default admin account
+
+On first launch the app seeds a default admin user into the local browser database:
+
+- **Email:** `admin@company.com`
+- **Password:** `pass123`
+
+This account lives entirely in your browser's IndexedDB — each browser/profile gets its own copy. To reset, delete the `employee-management` database under DevTools → Application → IndexedDB and reload.
 
 ## Code scaffolding
 

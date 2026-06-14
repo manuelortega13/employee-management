@@ -1,7 +1,8 @@
-import { HttpClient } from '@angular/common/http';
 import { Injectable, inject, signal, computed } from '@angular/core';
 import { Router } from '@angular/router';
-import { Observable, tap } from 'rxjs';
+import { Observable, defer, from, map, tap } from 'rxjs';
+import { db } from '../data/db';
+import { verifyPassword } from '../data/password';
 
 export interface AuthUser {
   id: number;
@@ -12,13 +13,11 @@ export interface AuthUser {
 }
 
 interface LoginResponse {
-  token: string;
   user: AuthUser;
 }
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  private readonly http = inject(HttpClient);
   private readonly router = inject(Router);
 
   readonly user = signal<AuthUser | null>(this.loadUser());
@@ -26,24 +25,19 @@ export class AuthService {
   readonly isAdmin = computed(() => this.user()?.role === 'ADMIN');
 
   login(email: string, password: string): Observable<LoginResponse> {
-    return this.http.post<LoginResponse>('/api/auth/login', { email, password }).pipe(
+    return defer(() => from(this.attemptLogin(email, password))).pipe(
       tap((response) => {
-        localStorage.setItem('auth_token', response.token);
         localStorage.setItem('auth_user', JSON.stringify(response.user));
         this.user.set(response.user);
-      })
+      }),
+      map((response) => response)
     );
   }
 
   logout(): void {
-    localStorage.removeItem('auth_token');
     localStorage.removeItem('auth_user');
     this.user.set(null);
     this.router.navigate(['/login']);
-  }
-
-  getToken(): string | null {
-    return localStorage.getItem('auth_token');
   }
 
   redirectAfterLogin(): void {
@@ -53,6 +47,27 @@ export class AuthService {
     } else {
       this.router.navigate(['/attendance']);
     }
+  }
+
+  private async attemptLogin(email: string, password: string): Promise<LoginResponse> {
+    const normalized = email.trim().toLowerCase();
+    const employee = await db.employees.where('email').equalsIgnoreCase(normalized).first();
+    if (!employee || !employee.isActive) {
+      throw new Error('Invalid email or password');
+    }
+    const ok = await verifyPassword(password, employee.passwordHash, employee.passwordSalt);
+    if (!ok) {
+      throw new Error('Invalid email or password');
+    }
+    return {
+      user: {
+        id: employee.id,
+        firstName: employee.firstName,
+        lastName: employee.lastName,
+        email: employee.email,
+        role: employee.role,
+      },
+    };
   }
 
   private loadUser(): AuthUser | null {

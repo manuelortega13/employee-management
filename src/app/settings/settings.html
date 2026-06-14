@@ -1,0 +1,113 @@
+<h1 class="page-title">Settings</h1>
+
+@if (status()) {
+  <div class="alert alert-success" role="status">{{ status() }}</div>
+}
+@if (error()) {
+  <div class="alert alert-error" role="alert">{{ error() }}</div>
+}
+
+<section class="card">
+  <h2 class="card-title">Backups</h2>
+  <p class="card-desc">
+    Your data lives in this browser. Save a backup file so you can restore later or transfer to
+    another device.
+  </p>
+
+  <dl class="info-grid">
+    <div class="info-row">
+      <dt>Last backup</dt>
+      <dd>
+        @if (lastBackupAt(); as last) {
+          {{ last | date: 'medium' }}
+        } @else {
+          Never
+        }
+      </dd>
+    </div>
+    @if (fsaSupported()) {
+      <div class="info-row">
+        <dt>Backup folder</dt>
+        <dd>
+          @if (folderName(); as name) {
+            {{ name }}
+          } @else {
+            Not set
+          }
+        </dd>
+      </div>
+    }
+  </dl>
+
+  <div class="actions">
+    @if (fsaSupported()) {
+      <button class="btn btn-primary" (click)="chooseFolder()" [disabled]="busy()">
+        {{ folderName() ? 'Change folder' : 'Pick backup folder' }}
+      </button>
+      @if (folderName()) {
+        <button class="btn btn-secondary" (click)="forgetFolder()" [disabled]="busy()">
+          Forget folder
+        </button>
+      }
+    }
+    <button class="btn btn-primary" (click)="exportNow()" [disabled]="busy()">
+      {{ busy() ? 'Working…' : 'Export now' }}
+    </button>
+    <button class="btn btn-secondary" (click)="openImportPicker()" [disabled]="busy()">
+      Import from file…
+    </button>
+    <input
+      #importInput
+      type="file"
+      accept="application/json,.json"
+      class="hidden-input"
+      (change)="onImportFile($event)"
+    />
+  </div>
+
+  @if (!fsaSupported()) {
+    <p class="note">
+      Automatic backups to a folder require a Chromium-based browser (Chrome / Edge). On other
+      browsers, you can still export manually with the button above.
+    </p>
+  } @else {
+    <p class="note">
+      Automatic daily backups run in the background. The most recent 7 are kept; older files are
+      removed automatically.
+    </p>
+  }
+</section>
+
+<section class="card">
+  <h2 class="card-title">Storage</h2>
+  <dl class="info-grid">
+    <div class="info-row">
+      <dt>Persistent storage</dt>
+      <dd>
+        @if (persisted() === true) {
+          <span class="badge badge-good">Enabled</span>
+        } @else if (persisted() === false) {
+          <span class="badge badge-warn">Not enabled</span>
+        } @else {
+          <span class="badge badge-neutral">Unknown</span>
+        }
+      </dd>
+    </div>
+    @if (quotaText(); as q) {
+      <div class="info-row">
+        <dt>Usage</dt>
+        <dd>{{ q }}</dd>
+      </div>
+    }
+  </dl>
+  @if (persisted() !== true) {
+    <div class="actions">
+      <button class="btn btn-secondary" (click)="requestPersistence()" [disabled]="busy()">
+        Request persistent storage
+      </button>
+    </div>
+    <p class="note">
+      Persistent storage prevents the browser from auto-evicting your data under storage pressure.
+    </p>
+  }
+</section>

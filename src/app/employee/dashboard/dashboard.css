@@ -1,15 +1,15 @@
 @reference "tailwindcss";
 
 .page-title {
-  @apply text-2xl font-bold text-slate-800 mb-6;
+  @apply text-xl sm:text-2xl font-bold text-slate-800 mb-4 sm:mb-6;
 }
 
 .stats-grid {
-  @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6;
+  @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6;
 }
 
 .stat-card {
-  @apply bg-white rounded-xl p-6 shadow-sm border border-slate-200 flex flex-col gap-2;
+  @apply bg-white rounded-xl p-5 sm:p-6 shadow-sm border border-slate-200 flex flex-col gap-2;
 }
 
 .stat-label {
@@ -17,5 +17,5 @@
 }
 
 .stat-value {
-  @apply text-3xl font-bold text-slate-800;
+  @apply text-2xl sm:text-3xl font-bold text-slate-800;
 }

@@ -1,31 +1,82 @@
 <div class="employee-container">
-  <aside class="sidebar">
+  <header class="topbar" role="banner">
+    <span class="topbar-title">Employee Portal</span>
+    <button type="button" class="topbar-logout" (click)="logout()">Logout</button>
+  </header>
+
+  <aside class="sidebar" role="navigation" aria-label="Employee navigation">
     <div class="sidebar-header">
       <h2>Employee Portal</h2>
     </div>
     <nav class="sidebar-nav">
-      <a routerLink="/attendance" routerLinkActive="active">
-        Attendance
-      </a>
-      <a routerLink="/attendance-report" routerLinkActive="active">
-        Attendance Report
-      </a>
-      <a routerLink="/dashboard" routerLinkActive="active">
-        Dashboard
-      </a>
-      <a routerLink="/profile" routerLinkActive="active">
-        My Profile
-      </a>
-      <a routerLink="/requests" routerLinkActive="active">
-        Requests
-      </a>
+      <a routerLink="/dashboard" routerLinkActive="active">Dashboard</a>
+      <a routerLink="/attendance" routerLinkActive="active">Attendance</a>
+      <a routerLink="/attendance-report" routerLinkActive="active">Attendance Report</a>
+      <a routerLink="/profile" routerLinkActive="active">My Profile</a>
+      <a routerLink="/requests" routerLinkActive="active">Requests</a>
+      <a routerLink="/settings" routerLinkActive="active">Settings</a>
     </nav>
     <div class="sidebar-footer">
       <span class="user-name">{{ user()?.firstName }} {{ user()?.lastName }}</span>
       <button class="btn-logout" (click)="logout()">Logout</button>
     </div>
   </aside>
-  <main class="main-content">
+
+  <main class="main-content" id="main-content">
     <router-outlet />
   </main>
+
+  <nav class="bottom-nav" role="navigation" aria-label="Primary">
+    <a routerLink="/dashboard" routerLinkActive="active" class="bottom-nav-item">
+      <svg class="bottom-nav-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <path fill="currentColor" d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/>
+      </svg>
+      <span class="bottom-nav-label">Dashboard</span>
+    </a>
+    <a routerLink="/attendance" routerLinkActive="active" class="bottom-nav-item">
+      <svg class="bottom-nav-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <path fill="currentColor" d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 18a8 8 0 1 1 8-8 8 8 0 0 1-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/>
+      </svg>
+      <span class="bottom-nav-label">Attendance</span>
+    </a>
+
+    <button
+      type="button"
+      class="bottom-nav-fab"
+      [class.fab-done]="primaryAction() === 'done'"
+      [disabled]="primaryAction() === 'done'"
+      [attr.aria-label]="primaryActionLabel()"
+      (click)="triggerPrimaryAction()"
+    >
+      <span class="bottom-nav-fab-button">
+        @if (primaryAction() === 'done') {
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path fill="currentColor" d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+          </svg>
+        } @else if (primaryAction() === 'checkIn') {
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path fill="currentColor" d="M10 17l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+          </svg>
+        } @else {
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path fill="currentColor" d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h8v-2H4z"/>
+          </svg>
+        }
+      </span>
+      <span class="bottom-nav-fab-label">{{ primaryActionLabel() }}</span>
+    </button>
+
+    <a routerLink="/attendance-report" routerLinkActive="active" class="bottom-nav-item">
+      <svg class="bottom-nav-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <path fill="currentColor" d="M19 3h-1V1h-2v2H8V1H6v2H5a2 2 0 0 0-2 2v15a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2zm0 17H5V8h14v12zM7 10h5v5H7v-5z"/>
+      </svg>
+      <span class="bottom-nav-label">Report</span>
+    </a>
+    <a routerLink="/profile" routerLinkActive="active" class="bottom-nav-item">
+      <svg class="bottom-nav-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <path fill="currentColor" d="M12 12a4 4 0 1 0-4-4 4 4 0 0 0 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+      </svg>
+      <span class="bottom-nav-label">Profile</span>
+    </a>
+  </nav>
 </div>

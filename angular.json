@@ -26,20 +26,21 @@
             ],
             "styles": [
               "src/styles.css"
-            ]
+            ],
+            "serviceWorker": "ngsw-config.json"
           },
           "configurations": {
             "production": {
               "budgets": [
                 {
                   "type": "initial",
-                  "maximumWarning": "500kB",
-                  "maximumError": "1MB"
+                  "maximumWarning": "750kB",
+                  "maximumError": "1.5MB"
                 },
                 {
                   "type": "anyComponentStyle",
-                  "maximumWarning": "16kB",
-                  "maximumError": "32kB"
+                  "maximumWarning": "24kB",
+                  "maximumError": "48kB"
                 }
               ],
               "outputHashing": "all"
@@ -54,15 +55,13 @@
         },
         "serve": {
           "builder": "@angular/build:dev-server",
-          "options": {
-            "proxyConfig": "proxy.conf.json"
-          },
           "configurations": {
             "production": {
               "buildTarget": "employee-management:build:production"
             },
             "development": {
-              "buildTarget": "employee-management:build:development"
+              "buildTarget": "employee-management:build:development",
+              "port": 4202
             }
           },
           "defaultConfiguration": "development"

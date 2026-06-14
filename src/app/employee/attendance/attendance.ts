@@ -1,5 +1,6 @@
 import { Component, computed, ElementRef, inject, signal, viewChild } from '@angular/core';
 import { DatePipe } from '@angular/common';
+import { ActivatedRoute, Router } from '@angular/router';
 import { AttendanceRecord, AttendanceService } from './attendance.service';
 
 type CameraAction = 'checkIn' | 'checkOut' | 'startBreak' | 'endBreak';
@@ -12,6 +13,15 @@ type CameraAction = 'checkIn' | 'checkOut' | 'startBreak' | 'endBreak';
 })
 export class EmployeeAttendance {
   private readonly attendance = inject(AttendanceService);
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
+
+  private readonly validActions: ReadonlyArray<CameraAction> = [
+    'checkIn',
+    'checkOut',
+    'startBreak',
+    'endBreak',
+  ];
 
   protected readonly now = signal(new Date());
   protected readonly records = this.attendance.records;
@@ -52,6 +62,19 @@ export class EmployeeAttendance {
   constructor() {
     this.clockInterval = setInterval(() => this.now.set(new Date()), 1000);
     this.attendance.loadRecords();
+
+    this.route.queryParamMap.subscribe((params) => {
+      const action = params.get('action') as CameraAction | null;
+      if (action && this.validActions.includes(action) && !this.cameraOpen()) {
+        this.openCamera(action);
+        this.router.navigate([], {
+          relativeTo: this.route,
+          queryParams: { action: null },
+          queryParamsHandling: 'merge',
+          replaceUrl: true,
+        });
+      }
+    });
   }
 
   ngOnDestroy(): void {

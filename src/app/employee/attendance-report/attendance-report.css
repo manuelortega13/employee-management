@@ -1,32 +1,33 @@
 @reference "tailwindcss";
 
 .page-title {
-  @apply text-2xl font-bold text-slate-800 mb-6;
+  @apply text-xl sm:text-2xl font-bold text-slate-800 mb-4 sm:mb-6;
 }
 
 /* Month navigation */
 
 .month-nav {
-  @apply flex items-center justify-center gap-4 mb-6;
+  @apply flex items-center justify-center gap-3 sm:gap-4 mb-6;
 }
 
 .nav-btn {
-  @apply w-10 h-10 rounded-lg bg-white border border-slate-200 text-slate-600
-    flex items-center justify-center cursor-pointer hover:bg-slate-50 transition-colors text-lg;
+  @apply w-11 h-11 rounded-lg bg-white border border-slate-200 text-slate-600
+    flex items-center justify-center cursor-pointer hover:bg-slate-50 transition-colors text-lg
+    focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400;
 }
 
 .month-label {
-  @apply text-lg font-semibold text-slate-800 min-w-48 text-center;
+  @apply text-base sm:text-lg font-semibold text-slate-800 min-w-40 sm:min-w-48 text-center;
 }
 
 /* Summary stats */
 
 .stats-grid {
-  @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8;
+  @apply grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8;
 }
 
 .stat-card {
-  @apply bg-white rounded-xl p-5 shadow-sm border border-slate-200 flex flex-col gap-1;
+  @apply bg-white rounded-xl p-4 sm:p-5 shadow-sm border border-slate-200 flex flex-col gap-1;
 }
 
 .stat-label {
@@ -34,13 +35,17 @@
 }
 
 .stat-value {
-  @apply text-2xl font-bold text-slate-800;
+  @apply text-xl sm:text-2xl font-bold text-slate-800;
 }
 
-/* Report table */
+/* Report table — desktop */
+
+.table-wrapper {
+  @apply hidden md:block overflow-x-auto bg-white rounded-xl shadow-sm border border-slate-200;
+}
 
 .report-table {
-  @apply w-full bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden;
+  @apply w-full;
 }
 
 .report-table th {
@@ -49,6 +54,40 @@
 
 .report-table td {
   @apply px-6 py-4 text-sm text-slate-700 border-t border-slate-100;
+}
+
+/* Cards — mobile */
+
+.report-cards {
+  @apply md:hidden flex flex-col gap-3 list-none p-0 m-0;
+}
+
+.report-card {
+  @apply bg-white rounded-xl shadow-sm border border-slate-200 p-4;
+}
+
+.report-card-header {
+  @apply flex items-center justify-between mb-3 pb-2 border-b border-slate-100;
+}
+
+.report-card-date {
+  @apply text-sm font-semibold text-slate-800;
+}
+
+.report-card-grid {
+  @apply flex flex-col gap-2 m-0;
+}
+
+.report-card-row {
+  @apply flex items-baseline justify-between gap-3;
+}
+
+.report-card-row dt {
+  @apply text-xs font-medium text-slate-500 uppercase tracking-wide;
+}
+
+.report-card-row dd {
+  @apply m-0 text-sm text-slate-700 text-right;
 }
 
 .badge-complete {
@@ -60,5 +99,5 @@
 }
 
 .empty-state {
-  @apply bg-white rounded-xl p-12 shadow-sm border border-slate-200 text-center text-slate-400;
+  @apply bg-white rounded-xl p-8 sm:p-12 shadow-sm border border-slate-200 text-center text-slate-400;
 }

@@ -1,11 +1,11 @@
 @reference "tailwindcss";
 
 .login-page {
-  @apply min-h-screen flex items-center justify-center bg-slate-100 px-4;
+  @apply min-h-screen flex items-center justify-center bg-slate-100 px-4 py-8;
 }
 
 .login-card {
-  @apply bg-white rounded-2xl shadow-lg p-8 w-full max-w-sm;
+  @apply bg-white rounded-2xl shadow-lg p-6 sm:p-8 w-full max-w-sm;
 }
 
 .login-title {
@@ -29,13 +29,14 @@
 }
 
 .form-group input {
-  @apply px-3 py-2.5 rounded-lg border border-slate-200 text-sm text-slate-700
+  @apply px-3 py-3 rounded-lg border border-slate-200 text-base sm:text-sm text-slate-700
     outline-none focus:border-slate-400 focus:ring-1 focus:ring-slate-400;
 }
 
 .btn-login {
-  @apply w-full py-2.5 rounded-lg bg-slate-800 text-white font-semibold text-sm
-    cursor-pointer border-0 transition-colors hover:bg-slate-900 mt-2;
+  @apply w-full py-3 rounded-lg bg-slate-800 text-white font-semibold text-sm
+    cursor-pointer border-0 transition-colors hover:bg-slate-900 mt-2
+    focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-slate-400;
 }
 
 .btn-login:disabled {

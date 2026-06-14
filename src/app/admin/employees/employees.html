@@ -63,7 +63,13 @@
             } @else {
               <div class="action-buttons">
                 <button class="btn-icon btn-edit" (click)="openEdit(employee)">Edit</button>
-                <button class="btn-icon btn-danger" (click)="confirmDelete(employee.id)">Delete</button>
+                @if (canDelete(employee)) {
+                  <button class="btn-icon btn-danger" (click)="confirmDelete(employee.id)">Delete</button>
+                } @else {
+                  <span class="protected-tag" title="Cannot delete the last active administrator">
+                    Protected
+                  </span>
+                }
               </div>
             }
           </td>
@@ -125,7 +131,13 @@
       } @else {
         <div class="action-buttons">
           <button class="btn-icon btn-edit" (click)="openEdit(employee)">Edit</button>
-          <button class="btn-icon btn-danger" (click)="confirmDelete(employee.id)">Delete</button>
+          @if (canDelete(employee)) {
+            <button class="btn-icon btn-danger" (click)="confirmDelete(employee.id)">Delete</button>
+          } @else {
+            <span class="protected-tag" title="Cannot delete the last active administrator">
+              Protected
+            </span>
+          }
         </div>
       }
     </li>

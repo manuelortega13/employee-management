@@ -24,7 +24,23 @@ export class EmployeeService {
   }
 
   delete(id: number): Observable<void> {
-    return defer(() => from(db.employees.delete(id).then(() => undefined)));
+    return defer(() => from(this.performDelete(id)));
+  }
+
+  private async performDelete(id: number): Promise<void> {
+    const target = await db.employees.get(id);
+    if (!target) throw new Error('Employee not found');
+    if (target.role === 'ADMIN' && target.isActive) {
+      const otherActiveAdmins = await db.employees
+        .filter((e) => e.role === 'ADMIN' && e.isActive && e.id !== id)
+        .count();
+      if (otherActiveAdmins === 0) {
+        throw new Error(
+          'Cannot delete the last active administrator. Promote another employee to ADMIN first.'
+        );
+      }
+    }
+    await db.employees.delete(id);
   }
 
   private async queryAll(): Promise<Employee[]> {
@@ -75,6 +91,22 @@ export class EmployeeService {
       const conflict = await db.employees.where('email').equalsIgnoreCase(email).first();
       if (conflict && conflict.id !== id) {
         throw new Error('An employee with this email already exists');
+      }
+    }
+
+    const wouldRemoveAdmin =
+      existing.role === 'ADMIN' &&
+      existing.isActive &&
+      ((request.role !== undefined && request.role !== 'ADMIN') ||
+        (request.isActive !== undefined && !request.isActive));
+    if (wouldRemoveAdmin) {
+      const otherActiveAdmins = await db.employees
+        .filter((e) => e.role === 'ADMIN' && e.isActive && e.id !== id)
+        .count();
+      if (otherActiveAdmins === 0) {
+        throw new Error(
+          'Cannot remove the last active administrator. Promote another employee to ADMIN first.'
+        );
       }
     }
 

@@ -163,10 +163,19 @@ export class AdminEmployees {
         this.deleteConfirmId.set(null);
         this.loadEmployees();
       },
-      error: () => {
+      error: (err) => {
         this.deleteConfirmId.set(null);
+        this.error.set(err?.message ?? 'Failed to delete employee');
       },
     });
+  }
+
+  protected canDelete(employee: Employee): boolean {
+    if (employee.role !== 'ADMIN' || !employee.isActive) return true;
+    const otherActiveAdmins = this.employees().filter(
+      (e) => e.id !== employee.id && e.role === 'ADMIN' && e.isActive
+    ).length;
+    return otherActiveAdmins > 0;
   }
 
   protected updateFormField(field: string, value: unknown): void {

@@ -1,0 +1,127 @@
+<h1 class="page-title no-print">My Payrolls</h1>
+
+@if (error()) {
+  <div class="alert alert-error no-print" role="alert">{{ error() }}</div>
+}
+
+<div class="stats-grid no-print">
+  <div class="stat-card">
+    <span class="stat-label">Released</span>
+    <span class="stat-value">{{ totals().count }}</span>
+  </div>
+  <div class="stat-card">
+    <span class="stat-label">Total Gross</span>
+    <span class="stat-value">{{ formatMoney(totals().gross) }}</span>
+  </div>
+  <div class="stat-card">
+    <span class="stat-label">Total Net</span>
+    <span class="stat-value">{{ formatMoney(totals().net) }}</span>
+  </div>
+</div>
+
+@if (loading()) {
+  <div class="loading no-print">Loading…</div>
+} @else if (payrolls().length === 0) {
+  <div class="empty-state no-print">
+    No released payrolls yet. Payrolls will appear here once your admin releases them.
+  </div>
+} @else {
+  <ul class="payroll-list no-print" aria-label="Your payrolls">
+    @for (p of payrolls(); track p.id) {
+      <li class="payroll-card" (click)="openDetail(p)">
+        <div class="card-row top">
+          <span class="card-period">
+            {{ p.periodStart | date: 'MMM d' }} – {{ p.periodEnd | date: 'MMM d, y' }}
+          </span>
+          <span class="badge badge-good">RELEASED</span>
+        </div>
+        <dl class="card-grid">
+          <div class="card-grid-row">
+            <dt>Hours</dt>
+            <dd>{{ formatHours(p.totalHoursMs) }}</dd>
+          </div>
+          <div class="card-grid-row">
+            <dt>Gross</dt>
+            <dd>{{ formatMoney(p.grossSalary) }}</dd>
+          </div>
+          <div class="card-grid-row">
+            <dt>Net</dt>
+            <dd class="font-semibold">{{ formatMoney(p.netSalary) }}</dd>
+          </div>
+        </dl>
+        @if (p.releasedAt) {
+          <p class="released-on">Released {{ p.releasedAt | date: 'medium' }}</p>
+        }
+      </li>
+    }
+  </ul>
+}
+
+@if (detailRecord(); as r) {
+  <div class="modal-overlay" (click)="closeDetail()">
+    <div class="modal payslip" (click)="$event.stopPropagation()">
+      <div class="modal-header no-print">
+        <h2>Payslip</h2>
+        <button class="btn-close" (click)="closeDetail()" aria-label="Close">&times;</button>
+      </div>
+
+      <div class="modal-body payslip-body">
+        <div class="payslip-header">
+          <div>
+            <h3>Payslip</h3>
+            <p class="payslip-period">
+              Period: {{ r.periodStart | date: 'fullDate' }} – {{ r.periodEnd | date: 'fullDate' }}
+            </p>
+          </div>
+          <span class="badge badge-lg badge-good">RELEASED</span>
+        </div>
+
+        <section class="payslip-section">
+          <h4>Attendance</h4>
+          <dl class="info-grid">
+            <div><dt>Days complete</dt><dd>{{ r.daysComplete }}</dd></div>
+            @if (r.daysIncomplete > 0) {
+              <div><dt>Days incomplete</dt><dd>{{ r.daysIncomplete }}</dd></div>
+            }
+            <div><dt>Hours worked</dt><dd>{{ formatHours(r.totalHoursMs) }}</dd></div>
+            <div><dt>Break time</dt><dd>{{ formatHours(r.totalBreakMs) }}</dd></div>
+          </dl>
+        </section>
+
+        <section class="payslip-section">
+          <h4>Rate</h4>
+          <dl class="info-grid">
+            <div><dt>Daily rate</dt><dd>{{ formatMoney(r.dailyRate) }}</dd></div>
+            <div><dt>Standard hours</dt><dd>{{ r.workHoursPerDay }}h / day</dd></div>
+            <div><dt>Hourly rate</dt><dd>{{ formatMoney(r.hourlyRate) }}</dd></div>
+          </dl>
+        </section>
+
+        <section class="payslip-section">
+          <h4>Summary</h4>
+          <dl class="info-grid">
+            <div><dt>Gross salary</dt><dd>{{ formatMoney(r.grossSalary) }}</dd></div>
+            <div><dt>Bonuses</dt><dd>+ {{ formatMoney(r.bonuses) }}</dd></div>
+            <div><dt>Deductions</dt><dd>− {{ formatMoney(r.deductions) }}</dd></div>
+            <div class="net-line"><dt>Net salary</dt><dd>{{ formatMoney(r.netSalary) }}</dd></div>
+          </dl>
+          @if (r.notes) {
+            <p class="payslip-notes">{{ r.notes }}</p>
+          }
+        </section>
+
+        <section class="payslip-section payslip-trail">
+          <h4>Issued</h4>
+          @if (r.releasedAt) {
+            <p class="released-on">Released on {{ r.releasedAt | date: 'medium' }}</p>
+          }
+        </section>
+      </div>
+
+      <div class="modal-footer no-print">
+        <button class="btn btn-secondary" (click)="closeDetail()">Close</button>
+        <button class="btn btn-primary" (click)="printDetail()">Print / Save PDF</button>
+      </div>
+    </div>
+  </div>
+}

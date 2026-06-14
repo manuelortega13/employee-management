@@ -3,7 +3,7 @@
     @if (logo(); as src) {
       <img [src]="src" alt="" class="login-logo" />
     }
-    <h1 class="login-title">Employee Management</h1>
+    <h1 class="login-title">{{ companyName() }}</h1>
     <p class="login-subtitle">Sign in to your account</p>
 
     @if (error()) {

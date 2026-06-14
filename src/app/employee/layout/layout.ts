@@ -20,6 +20,7 @@ export class EmployeeLayout {
 
   protected readonly user = this.auth.user;
   protected readonly logo = this.branding.displayLogo;
+  protected readonly companyName = this.branding.companyName;
 
   protected readonly primaryAction = computed<PrimaryAction>(() => {
     const today = this.attendance.todayRecord();

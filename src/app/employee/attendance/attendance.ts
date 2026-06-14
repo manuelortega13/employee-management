@@ -106,13 +106,27 @@ export class EmployeeAttendance {
     const canvasEl = this.canvas()?.nativeElement;
     if (!videoEl || !canvasEl) return;
 
-    canvasEl.width = videoEl.videoWidth;
-    canvasEl.height = videoEl.videoHeight;
+    // Selfies are identity-verification thumbnails, not gallery photos.
+    // Cap the longer edge at 480px and use moderate JPEG quality to keep
+    // each captured frame ~15-25 KB in IndexedDB (vs ~50 KB at native res).
+    const SELFIE_MAX_DIMENSION = 480;
+    const SELFIE_JPEG_QUALITY = 0.65;
+
+    const sourceWidth = videoEl.videoWidth;
+    const sourceHeight = videoEl.videoHeight;
+    if (!sourceWidth || !sourceHeight) return;
+
+    const scale = Math.min(1, SELFIE_MAX_DIMENSION / Math.max(sourceWidth, sourceHeight));
+    const targetWidth = Math.round(sourceWidth * scale);
+    const targetHeight = Math.round(sourceHeight * scale);
+
+    canvasEl.width = targetWidth;
+    canvasEl.height = targetHeight;
     const ctx = canvasEl.getContext('2d');
     if (!ctx) return;
 
-    ctx.drawImage(videoEl, 0, 0);
-    const dataUrl = canvasEl.toDataURL('image/jpeg', 0.8);
+    ctx.drawImage(videoEl, 0, 0, targetWidth, targetHeight);
+    const dataUrl = canvasEl.toDataURL('image/jpeg', SELFIE_JPEG_QUALITY);
     this.capturedPhoto.set(dataUrl);
     this.stopCamera();
   }

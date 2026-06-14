@@ -27,6 +27,8 @@ export class Settings {
   protected readonly persisted = this.storage.persisted;
   protected readonly quota = this.storage.quota;
   protected readonly logo = this.branding.logo;
+  protected readonly companyName = this.branding.companyName;
+  protected readonly companyNameDraft = signal(this.branding.companyName());
   protected readonly currency = this.preferences.currency;
   protected readonly currencies = CURRENCIES;
   protected readonly workHoursPerDay = this.preferences.workHoursPerDay;
@@ -139,12 +141,29 @@ export class Settings {
     this.busy.set(true);
     try {
       await this.branding.setLogoFromFile(file);
-      applyManifest(this.branding.logo());
+      applyManifest(this.branding.logo(), this.branding.companyName());
       this.status.set('Logo updated. Reinstall the app to refresh the icon on already-installed PWAs.');
     } catch (err) {
       this.error.set(this.errMessage(err, 'Could not set logo.'));
     } finally {
       this.busy.set(false);
+    }
+  }
+
+  protected async commitCompanyName(): Promise<void> {
+    this.reset();
+    const draft = this.companyNameDraft().trim();
+    if (!draft || draft === this.branding.companyName()) {
+      this.companyNameDraft.set(this.branding.companyName());
+      return;
+    }
+    try {
+      await this.branding.setCompanyName(draft);
+      applyManifest(this.branding.logo(), this.branding.companyName());
+      this.status.set('Name updated.');
+    } catch (err) {
+      this.companyNameDraft.set(this.branding.companyName());
+      this.error.set(this.errMessage(err, 'Could not update name.'));
     }
   }
 
@@ -177,7 +196,7 @@ export class Settings {
     this.busy.set(true);
     try {
       await this.branding.clearLogo();
-      applyManifest(null);
+      applyManifest(null, this.branding.companyName());
       this.status.set('Logo removed.');
     } finally {
       this.busy.set(false);

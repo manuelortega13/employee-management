@@ -4,7 +4,7 @@
       @if (logo(); as src) {
         <img [src]="src" alt="" class="topbar-logo" />
       }
-      <span class="topbar-title">Employee Portal</span>
+      <span class="topbar-title">{{ companyName() }}</span>
     </span>
     <button type="button" class="topbar-logout" (click)="logout()">Logout</button>
   </header>
@@ -14,7 +14,7 @@
       @if (logo(); as src) {
         <img [src]="src" alt="" class="sidebar-logo" />
       }
-      <h2>Employee Portal</h2>
+      <h2>{{ companyName() }}</h2>
     </div>
     <nav class="sidebar-nav">
       <a routerLink="/dashboard" routerLinkActive="active">Dashboard</a>
@@ -23,6 +23,7 @@
       <a routerLink="/profile" routerLinkActive="active">My Profile</a>
       <a routerLink="/requests" routerLinkActive="active">Requests</a>
       <a routerLink="/cash-advances" routerLinkActive="active">Cash Advances</a>
+      <a routerLink="/payrolls" routerLinkActive="active">My Payrolls</a>
     </nav>
     <div class="sidebar-footer">
       <span class="user-name">{{ user()?.firstName }} {{ user()?.lastName }}</span>

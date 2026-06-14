@@ -14,6 +14,7 @@ export class AdminLayout {
   private readonly branding = inject(BrandingService);
   protected readonly user = this.auth.user;
   protected readonly logo = this.branding.displayLogo;
+  protected readonly companyName = this.branding.companyName;
 
   protected logout(): void {
     this.auth.logout();

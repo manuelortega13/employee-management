@@ -2,19 +2,35 @@ import { Injectable, computed, signal } from '@angular/core';
 import { db } from '../data/db';
 
 const LOGO_KEY = 'branding.logo';
+const NAME_KEY = 'branding.name';
 const LOGO_SIZE = 512;
 const MAX_INPUT_BYTES = 5 * 1024 * 1024;
 
 export const DEFAULT_LOGO_PATH = 'icons/icon-512.png';
+export const DEFAULT_COMPANY_NAME = 'Employee Management';
 
 @Injectable({ providedIn: 'root' })
 export class BrandingService {
   readonly logo = signal<string | null>(null);
+  readonly companyName = signal<string>(DEFAULT_COMPANY_NAME);
+
   readonly displayLogo = computed(() => this.logo() ?? DEFAULT_LOGO_PATH);
 
   async init(): Promise<void> {
-    const row = await db.meta.get(LOGO_KEY);
-    this.logo.set(row?.value ?? null);
+    const [logoRow, nameRow] = await Promise.all([
+      db.meta.get(LOGO_KEY),
+      db.meta.get(NAME_KEY),
+    ]);
+    this.logo.set(logoRow?.value ?? null);
+    if (nameRow?.value) this.companyName.set(nameRow.value);
+  }
+
+  async setCompanyName(name: string): Promise<void> {
+    const trimmed = name.trim();
+    if (!trimmed) throw new Error('Name cannot be empty');
+    if (trimmed.length > 60) throw new Error('Name is too long (60 character max)');
+    await db.meta.put({ key: NAME_KEY, value: trimmed });
+    this.companyName.set(trimmed);
   }
 
   async setLogoFromFile(file: File): Promise<void> {

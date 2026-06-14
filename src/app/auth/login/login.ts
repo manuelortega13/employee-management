@@ -14,6 +14,7 @@ export class Login {
   private readonly branding = inject(BrandingService);
 
   protected readonly logo = this.branding.displayLogo;
+  protected readonly companyName = this.branding.companyName;
   protected readonly email = signal('');
   protected readonly password = signal('');
   protected readonly error = signal<string | null>(null);

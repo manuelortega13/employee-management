@@ -8,10 +8,28 @@
 }
 
 <section class="card">
-  <h2 class="card-title">Company Logo</h2>
+  <h2 class="card-title">Branding</h2>
   <p class="card-desc">
-    Used throughout the app and as the icon for installed PWAs.
+    Set the name and logo that appear in the app, browser tab, and PWA installer.
   </p>
+
+  <div class="form-group">
+    <label for="companyName">Name</label>
+    <input
+      id="companyName"
+      type="text"
+      maxlength="60"
+      class="currency-select"
+      placeholder="e.g. Acme Coffee Co."
+      [ngModel]="companyNameDraft()"
+      (ngModelChange)="companyNameDraft.set($event)"
+      (blur)="commitCompanyName()"
+      (keydown.enter)="commitCompanyName(); $any($event.target).blur()"
+    />
+    <p class="note">Shown in the sidebar, login screen, and browser tab. Press Enter or tab out to save.</p>
+  </div>
+
+  <p class="card-desc mt-4 mb-2">Logo</p>
 
   <div class="logo-row">
     <div class="logo-preview" aria-hidden="true">

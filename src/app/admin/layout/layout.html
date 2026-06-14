@@ -4,7 +4,7 @@
       @if (logo(); as src) {
         <img [src]="src" alt="" class="topbar-logo" />
       }
-      <span class="topbar-title">Admin Panel</span>
+      <span class="topbar-title">{{ companyName() }} · Admin</span>
     </span>
     <button type="button" class="topbar-logout" (click)="logout()">Logout</button>
   </header>
@@ -14,7 +14,7 @@
       @if (logo(); as src) {
         <img [src]="src" alt="" class="sidebar-logo" />
       }
-      <h2>Admin Panel</h2>
+      <h2>{{ companyName() }}</h2>
     </div>
     <nav class="sidebar-nav">
       <a routerLink="/manage" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">

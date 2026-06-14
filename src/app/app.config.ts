@@ -32,7 +32,7 @@ export const appConfig: ApplicationConfig = {
         await backup.init();
         await branding.init();
         await preferences.init();
-        applyManifest(branding.logo());
+        applyManifest(branding.logo(), branding.companyName());
         await backup.runScheduledBackup();
       })();
     }),

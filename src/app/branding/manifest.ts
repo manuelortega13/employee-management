@@ -24,10 +24,13 @@ const DEFAULT_ICONS: ManifestIcon[] = [
 
 let currentManifestUrl: string | null = null;
 
-export function applyManifest(logo: string | null): void {
+export function applyManifest(logo: string | null, name: string): void {
+  const appName = name.trim() || 'Employee Management';
+  const shortName = appName.length > 12 ? appName.slice(0, 12) : appName;
+
   const manifest: AppManifest = {
-    name: 'Employee Management',
-    short_name: 'EM',
+    name: appName,
+    short_name: shortName,
     description: 'Local-first employee attendance and management app.',
     theme_color: '#3730a3',
     background_color: '#f8fafc',
@@ -55,6 +58,8 @@ export function applyManifest(logo: string | null): void {
 
   if (currentManifestUrl) URL.revokeObjectURL(currentManifestUrl);
   currentManifestUrl = url;
+
+  document.title = appName;
 
   applyFavicon(logo);
 }

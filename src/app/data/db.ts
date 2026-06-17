@@ -1,4 +1,5 @@
 import Dexie, { Table } from 'dexie';
+import { formatLocalDate, parseStoredTimestamp } from '../shared/date-util';
 import {
   AttendanceRecordRow,
   BreakRecordRow,
@@ -38,6 +39,24 @@ export class EmployeeDb extends Dexie {
     this.version(4).stores({
       cashAdvances: '++id, employeeId, status, [employeeId+status]',
     });
+    // Repair attendance `date` fields written with the old UTC-based formatter.
+    // Early-morning check-ins in timezones ahead of UTC (e.g. UTC+8) were filed
+    // under the previous calendar day. Re-derive `date` from the local date of
+    // each record's check-in timestamp so it matches the user's wall-clock day.
+    this.version(5)
+      .stores({
+        attendances: '++id, employeeId, date, [employeeId+date]',
+      })
+      .upgrade((tx) =>
+        tx
+          .table<AttendanceRecordRow, number>('attendances')
+          .toCollection()
+          .modify((row) => {
+            if (!row.checkIn) return;
+            const corrected = formatLocalDate(parseStoredTimestamp(row.checkIn));
+            if (corrected !== row.date) row.date = corrected;
+          })
+      );
   }
 }
 

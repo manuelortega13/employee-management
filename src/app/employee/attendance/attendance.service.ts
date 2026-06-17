@@ -2,6 +2,7 @@ import { computed, inject, Injectable, signal } from '@angular/core';
 import { AuthService } from '../../auth/auth.service';
 import { db } from '../../data/db';
 import { AttendanceRecordRow, BreakRecordRow } from '../../data/types';
+import { formatLocalDate } from '../../shared/date-util';
 
 export interface BreakRecord {
   id: number;
@@ -147,7 +148,7 @@ export class AttendanceService {
   }
 
   formatDate(date: Date): string {
-    return date.toISOString().slice(0, 10);
+    return formatLocalDate(date);
   }
 
   toLocalTime(utcTimestamp: string): string {

@@ -10,6 +10,7 @@ import {
 } from '../../payroll/payroll.service';
 import { PreferencesService } from '../../preferences/preferences.service';
 import { ConfirmService } from '../../shared/confirm.service';
+import { formatLocalDate } from '../../shared/date-util';
 import { Employee } from '../employees/data/employee.model';
 import { EmployeeService } from '../employees/data/employee.service';
 
@@ -505,7 +506,7 @@ export class AdminPayroll {
 }
 
 function formatIsoDate(date: Date): string {
-  return date.toISOString().slice(0, 10);
+  return formatLocalDate(date);
 }
 
 function csvCell(value: string): string {

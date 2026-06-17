@@ -4,6 +4,7 @@ import { db } from '../data/db';
 import { getActivePayrollPeriods, isDateCovered } from '../data/payroll-coverage';
 import { CashAdvanceRecord, CashAdvanceStatus } from '../data/types';
 import { PreferencesService } from '../preferences/preferences.service';
+import { formatLocalDate } from '../shared/date-util';
 
 export interface CashAdvance {
   id: number;
@@ -244,7 +245,7 @@ function round2(value: number): number {
 }
 
 function formatIsoDate(date: Date): string {
-  return date.toISOString().slice(0, 10);
+  return formatLocalDate(date);
 }
 
 function parseUtc(ts: string): Date {

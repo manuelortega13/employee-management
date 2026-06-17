@@ -7,6 +7,7 @@ import {
   PayrollRecord,
   TimeOffRequestRecord,
 } from '../data/types';
+import { formatLocalDate } from '../shared/date-util';
 
 export const BACKUP_SCHEMA = 'employee-management';
 export const BACKUP_VERSION = 4;
@@ -28,6 +29,6 @@ export interface BackupFile {
 }
 
 export function backupFilename(date: Date): string {
-  const iso = date.toISOString().slice(0, 10);
+  const iso = formatLocalDate(date);
   return `${BACKUP_PREFIX}${iso}.json`;
 }

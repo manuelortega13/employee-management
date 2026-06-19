@@ -1,12 +1,12 @@
 <h1 class="page-title">Attendance Reports</h1>
 
-<div class="filters">
+<form class="filters" (ngSubmit)="loadReport()" aria-label="Report filters">
   <div class="filter-group">
     <label for="filter-employee">Employee</label>
     <select
       id="filter-employee"
       [ngModel]="selectedEmployeeId()"
-      (ngModelChange)="selectedEmployeeId.set($event === '' ? null : +$event)"
+      (ngModelChange)="selectedEmployeeId.set($event === '' ? null : +$event); loadReport()"
       name="employee"
     >
       <option value="">All Employees</option>
@@ -20,7 +20,7 @@
     <select
       id="filter-month"
       [ngModel]="selectedMonth()"
-      (ngModelChange)="selectedMonth.set(+$event)"
+      (ngModelChange)="selectedMonth.set(+$event); loadReport()"
       name="month"
     >
       <option [value]="1">January</option>
@@ -39,22 +39,41 @@
   </div>
   <div class="filter-group">
     <label for="filter-year">Year</label>
-    <input
+    <select
       id="filter-year"
-      type="number"
       [ngModel]="selectedYear()"
-      (ngModelChange)="selectedYear.set(+$event)"
+      (ngModelChange)="selectedYear.set(+$event); loadReport()"
       name="year"
-    />
+    >
+      @for (y of years; track y) {
+        <option [value]="y">{{ y }}</option>
+      }
+    </select>
   </div>
-  <button class="btn btn-primary" (click)="loadReport()">Generate</button>
-</div>
+  <button
+    type="button"
+    class="btn btn-secondary filters-reset"
+    (click)="resetFilters()"
+    [disabled]="isDefaultFilter()"
+  >
+    Reset
+  </button>
+</form>
+
+<p class="filter-summary" aria-live="polite">
+  Showing <strong>{{ activeEmployeeLabel() }}</strong>
+  <span class="filter-summary-sep" aria-hidden="true">·</span>
+  <strong>{{ monthLabel() }}</strong>
+</p>
 
 @if (loading()) {
-  <div class="loading">Loading report...</div>
+  <div class="loading" role="status" aria-live="polite">Loading report…</div>
 }
 
 @if (!loading() && filteredReports().length > 0) {
+  <section aria-labelledby="summary-heading">
+  <h2 id="summary-heading" class="section-title">Summary</h2>
+
   <div class="stats-grid">
     <div class="stat-card">
       <span class="stat-label">Employees</span>
@@ -68,13 +87,14 @@
 
   <div class="table-wrapper">
     <table class="report-table">
+      <caption class="sr-only">Attendance summary per employee for {{ monthLabel() }}</caption>
       <thead>
         <tr>
-          <th>Employee</th>
-          <th>Days Present</th>
-          <th>Total Break</th>
-          <th>Total Hours Worked</th>
-          <th>Avg Hours / Day</th>
+          <th scope="col">Employee</th>
+          <th scope="col">Days Present</th>
+          <th scope="col">Total Break</th>
+          <th scope="col">Total Hours Worked</th>
+          <th scope="col">Avg Hours / Day</th>
         </tr>
       </thead>
       <tbody>
@@ -130,20 +150,29 @@
       </li>
     }
   </ul>
+  </section>
 
   @if (selectedEmployeeId() !== null && filteredReports().length > 0) {
-    <h2 class="section-title">Daily Breakdown</h2>
+    <section aria-labelledby="breakdown-heading">
+    <h2 id="breakdown-heading" class="section-title">
+      Daily Breakdown — {{ filteredReports()[0].employee.firstName }}
+      {{ filteredReports()[0].employee.lastName }}
+    </h2>
 
     <div class="table-wrapper">
       <table class="report-table">
+        <caption class="sr-only">
+          Daily attendance for {{ filteredReports()[0].employee.firstName }}
+          {{ filteredReports()[0].employee.lastName }}, {{ monthLabel() }}
+        </caption>
         <thead>
           <tr>
-            <th>Date</th>
-            <th>Check In</th>
-            <th>Check Out</th>
-            <th>Break</th>
-            <th>Hours Worked</th>
-            <th>Actions</th>
+            <th scope="col">Date</th>
+            <th scope="col">Check In</th>
+            <th scope="col">Check Out</th>
+            <th scope="col">Break</th>
+            <th scope="col">Hours Worked</th>
+            <th scope="col">Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -167,7 +196,13 @@
                 }
               </td>
               <td>
-                <button class="btn-icon btn-edit" (click)="openEdit(record)">Edit</button>
+                <button
+                  class="btn-icon btn-edit"
+                  (click)="openEdit(record)"
+                  [attr.aria-label]="'Edit attendance for ' + (utc(record.checkIn) | date: 'EEE, MMM d')"
+                >
+                  Edit
+                </button>
               </td>
             </tr>
           }
@@ -210,14 +245,21 @@
             </div>
           </dl>
           <div class="report-card-actions">
-            <button class="btn-icon btn-edit" (click)="openEdit(record)">Edit</button>
+            <button
+                  class="btn-icon btn-edit"
+                  (click)="openEdit(record)"
+                  [attr.aria-label]="'Edit attendance for ' + (utc(record.checkIn) | date: 'EEE, MMM d')"
+                >
+                  Edit
+                </button>
           </div>
         </li>
       }
     </ul>
+    </section>
   }
 } @else if (!loading()) {
-  <div class="empty-state">
+  <div class="empty-state" role="status">
     <p>No attendance records found for {{ monthLabel() }}.</p>
   </div>
 }
@@ -227,11 +269,17 @@
 }
 
 @if (editOpen() && editRecord(); as r) {
-  <div class="modal-overlay" (click)="closeEdit()">
-    <div class="modal" (click)="$event.stopPropagation()">
+  <div class="modal-overlay" (click)="closeEdit()" (keydown.escape)="closeEdit()">
+    <div
+      class="modal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="edit-modal-title"
+      (click)="$event.stopPropagation()"
+    >
       <div class="modal-header">
-        <h2>Edit Attendance</h2>
-        <button class="btn-close" (click)="closeEdit()" aria-label="Close">&times;</button>
+        <h2 id="edit-modal-title">Edit Attendance</h2>
+        <button class="btn-close" (click)="closeEdit()" aria-label="Close dialog">&times;</button>
       </div>
       <form class="modal-body" (ngSubmit)="saveEdit()">
         @if (editError()) {
@@ -247,6 +295,7 @@
               id="e-checkin"
               type="time"
               required
+              autofocus
               [ngModel]="editForm().checkInTime"
               (ngModelChange)="updateEditField('checkInTime', $event)"
               name="checkInTime"

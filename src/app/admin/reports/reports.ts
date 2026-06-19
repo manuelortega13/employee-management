@@ -44,6 +44,38 @@ export class AdminReports {
     return date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
   });
 
+  // Recent years for the year dropdown (current year back 5, plus next year).
+  protected readonly years = ((): number[] => {
+    const current = new Date().getFullYear();
+    const list: number[] = [];
+    for (let y = current + 1; y >= current - 5; y--) list.push(y);
+    return list;
+  })();
+
+  protected readonly activeEmployeeLabel = computed(() => {
+    const id = this.selectedEmployeeId();
+    if (id === null) return 'All Employees';
+    const emp = this.employees().find((e) => e.id === id);
+    return emp ? `${emp.firstName} ${emp.lastName}` : 'All Employees';
+  });
+
+  protected readonly isDefaultFilter = computed(() => {
+    const now = new Date();
+    return (
+      this.selectedEmployeeId() === null &&
+      this.selectedMonth() === now.getMonth() + 1 &&
+      this.selectedYear() === now.getFullYear()
+    );
+  });
+
+  protected resetFilters(): void {
+    const now = new Date();
+    this.selectedEmployeeId.set(null);
+    this.selectedMonth.set(now.getMonth() + 1);
+    this.selectedYear.set(now.getFullYear());
+    this.loadReport();
+  }
+
   protected readonly filteredReports = computed(() => {
     const id = this.selectedEmployeeId();
     if (id === null) return this.reports();

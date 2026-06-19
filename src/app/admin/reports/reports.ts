@@ -137,14 +137,16 @@ export class AdminReports {
         if (records.length > 0 || this.selectedEmployeeId() === emp.id) {
           results.push({
             employee: emp,
-            records: records.map((r) => ({
-              id: r.id,
-              employeeId: r.employeeId,
-              date: r.date,
-              checkIn: r.checkIn,
-              checkOut: r.checkOut,
-              totalBreakMs: r.totalBreakMs,
-            })),
+            records: records
+              .map((r) => ({
+                id: r.id,
+                employeeId: r.employeeId,
+                date: r.date,
+                checkIn: r.checkIn,
+                checkOut: r.checkOut,
+                totalBreakMs: r.totalBreakMs,
+              }))
+              .sort((a, b) => b.date.localeCompare(a.date)),
             totalWorkedMs,
             totalBreakMs,
             daysPresent: records.length,

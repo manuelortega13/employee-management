@@ -45,3 +45,7 @@ Employee management application built with Angular 21, using standalone componen
   ```
 
   For informational messages, use a status banner on the page (existing `.alert-success` / `.alert-error` pattern) — not a popup.
+
+## Git Rules
+
+- **When asked to "commit and push" (or similar), do it on the CURRENT branch — including `main`.** Do NOT create a new branch unless explicitly told to. The default workflow here is committing straight to `main`. If you think a branch is warranted, ask first rather than acting.
